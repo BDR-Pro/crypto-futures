@@ -29,13 +29,31 @@ min_confidence = 0.55         # skip entries the model is not confident about
 flat_closes = true            # FLAT closes an open position
 max_open_positions = 10
 
+[jev]
+# Jev-style decision model: typed question -> calibrated probability per option, no text generation.
+# Strategy name: "jev". Get the weights once with `scripts/serve_local.sh download`.
+backend = "local"             # "local": load the GGUF in-process (no server, fastest)
+                              # "server": an OpenAI-compatible server returning top_logprobs (llama-server, LM Studio)
+model_path = "models/Jev-Style-Qwen3.5-2B-Decision-Q8_0.gguf"
+n_threads = 0                 # 0 = auto
+n_gpu_layers = 0              # -1 = everything on the GPU (needs a GPU build of llama-cpp-python)
+base_url = "http://127.0.0.1:8081/v1"
+model = "jev-style-2b"
+concurrency = 1
+question_set = "j1"
+ask_risk = false              # true: the model also picks leverage, stop width and target (4 questions/trade,
+                              # use with a GPU); false: leverage scales with its confidence, SL/TP from ATR
+cache_path = "data/llm_cache.sqlite"
+
 [llm]
-# Any OpenAI-compatible server: Ollama (default), llama.cpp server, vLLM, LM Studio.
-base_url = "http://localhost:11434/v1"
-model = "gpt-oss:20b"
+# Generative LLM writing a JSON decision. Strategy name: "llm".
+# Local llama.cpp from scripts/serve_local.sh; for Ollama use base_url = "http://localhost:11434/v1"
+# and a tag such as model = "gpt-oss:20b" or "qwen3:8b".
+base_url = "http://127.0.0.1:8080/v1"
+model = "local-llm"
 temperature = 0.0
 max_tokens = 600
-concurrency = 2               # parallel requests (set OLLAMA_NUM_PARALLEL to match)
+concurrency = 1               # parallel requests the local server can take
 prompt_version = "v2"
 reasoning_effort = "low"
 cache_path = "data/llm_cache.sqlite"

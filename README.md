@@ -1,82 +1,102 @@
 # crypto-futures
 
-Paper trading for crypto **perpetual futures**, with a **local open-weight LLM** making the calls.
-Every few hours the model looks at each of the top-10 coins and answers **LONG / SHORT / FLAT**,
+Paper trading for crypto **perpetual futures**, with **local open-weight models** making the calls.
+Every few hours a model looks at each of the top-10 coins and decides **LONG / SHORT / FLAT**,
 plus **leverage**, **stop-loss** and **take-profit**. A risk layer clamps those numbers, and a simulated
-exchange fills the orders. A benchmark harness then scores the model against rule-based baselines,
+exchange fills the orders. A benchmark harness scores each model against rule-based baselines,
 and a walk-forward optimizer tunes the risk settings so each run can improve on the last.
+
+**Everything runs on your machine.** The models are GGUF files served by llama.cpp (or Ollama / LM Studio)
+on `127.0.0.1`. Market history is downloaded once into `data/`. After that, backtests, benchmarks and the
+optimizer need no internet and no API keys. Only live paper trading reads prices from an exchange's public
+feed, because real-time prices can't come from anywhere else.
 
 > Paper trading only. Nothing here places real orders, and nothing here is financial advice.
 > Leveraged futures can lose your whole margin quickly.
 
 ```
- Binance Vision history ─┐                ┌─> backtest ─> benchmark leaderboard ─> history.jsonl
- live prices (ccxt) ─────┼─> features ─> LLM decision ─> risk layer ─> paper exchange
-                         │   (no look-ahead)   (cached)   (lev/SL/TP)  (fees, funding,
-                         └──────────────────────────────────────────    SL/TP, liquidation)
-                                                         optimize (walk-forward) ─> better [risk] config
+ data/ (Binance Vision history, local) ─┐               ┌─> backtest ─> benchmark leaderboard ─> history.jsonl
+ live prices (public feed, paper mode) ─┼─> features ─> model decision ─> risk layer ─> paper exchange
+                                        │  (no look-ahead)  (local, cached) (lev/SL/TP)   (fees, funding,
+                                        └─────────────────────────────────────────────    SL/TP, liquidation)
+                                                              optimize (walk-forward) ─> better [risk] config
 ```
+
+## Two kinds of decision model
+
+| Strategy | Model type | How it decides |
+|---|---|---|
+| `jev` | **Jev-style decision model**: a "System 1" model like TypeSafe's Jev, open-weight reproduction. Default: `chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-GGUF` (Apache-2.0). | It does not write text. It reads the market state plus a typed question with declared options, and returns a **calibrated probability for each option** from a single token. The direction question gives P(LONG), P(SHORT), P(FLAT); the most likely option is the action and its probability is the confidence. With `ask_risk = true` it also picks leverage, stop width (in ATR) and target (multiple of the stop). With `ask_risk = false` (fast on CPU), leverage scales with confidence and SL/TP come from ATR. The GGUF loads in-process with llama-cpp-python and only the last token's logits are computed: about 13 s per decision on 4 CPU cores. `backend = "server"` uses llama-server or LM Studio instead. |
+| `llm` | Generative LLM (Qwen3, gpt-oss, DeepSeek, ...) | Writes a JSON decision: `action`, `confidence`, `leverage`, `stop_loss_pct`, `take_profit_pct`, `reason`. |
+
+About Jev: TypeSafe AI released Jev on 15 Sep 2026 as a closed, hosted decision API. Open-weight clones followed
+within days, mostly built on Qwen3.5 with a LoRA adapter and a decision head. Examples are `autotrust/JEV-9B` / `JEV-27B`
+(vLLM, GPU), `jaredpalmer/kev-*`, `openjev/openjev` (non-commercial licence), `TokenRhythm/NeoHorse-Jev-4B` and the
+`chaoliangUNSW/Jev-Style-*` GGUFs. The Jev-Style v1 GGUF is used here because stock llama.cpp runs it directly, through
+token log-probs. The v3 GGUFs score higher but need a custom scorer built against a pinned llama.cpp commit.
 
 ## What it does
 
 | Piece | Details |
 |---|---|
 | **Coins** | BTC, ETH, XRP, BNB, SOL, DOGE, TRX, ADA, LINK, AVAX (USDT-M perps). Any Binance futures symbol works: `--symbols`. |
-| **Decision model** | Any local model behind an OpenAI-compatible API: Ollama (default), llama.cpp, vLLM, LM Studio. The default is `gpt-oss:20b`. |
-| **Model output** | JSON: `action`, `confidence`, `leverage`, `stop_loss_pct`, `take_profit_pct`, `reason`. Structured output is enforced when the server supports it, and parsing tolerates `<think>` blocks. |
-| **Model input** | 4h trend, momentum, volatility, range, volume and taker flow; daily trend context; funding rate; the last 12 closes. Only closed candles go in, so the model never sees the future. |
+| **Model input** | Trend, momentum, volatility, range, volume and taker flow on the decision timeframe; daily trend context; funding rate; the last 12 closes. Only closed candles go in, so the model never sees the future. |
 | **Risk layer** | Caps leverage. Clamps SL to a min/max. Keeps the SL inside the liquidation price. Filters by confidence. Sizes by margin or by risk. |
 | **Paper exchange** | Isolated margin. 0.05% taker fee and 2 bps slippage. 8h funding from real history. SL, TP and liquidation are checked on hourly candles. If SL and TP hit in the same candle, the SL is assumed to fill first. Gaps fill at the open. |
 | **Baselines** | `buy_and_hold`, `ema_trend`, `donchian_breakout`, `rsi_reversion`, `random`, `flat` |
 | **Metrics** | Return, CAGR, Sharpe, Sortino, max drawdown, Calmar, win rate, profit factor, liquidations, fees, funding. Also directional accuracy (forecasting skill without the risk layer) and accuracy on high-confidence calls. |
 
-## Quick start
+## Quick start (all local)
 
 ```bash
-pip install -e ".[live,plot,dev]"
+pip install -e ".[local,live,plot,dev]"
 
-# 1. a local model (pick one that fits your hardware, see below)
-ollama pull gpt-oss:20b
+# 1. local models: download the GGUFs into ./models once.
+#    The Jev-style model then loads in-process (no server). The generative LLM is served on 127.0.0.1:8080.
+scripts/serve_local.sh download
+scripts/serve_local.sh llm &          # only needed for the `llm` strategy; GPU_LAYERS=-1 offloads to a GPU
 
-# 2. history: hourly futures candles + funding for the top 10 (Binance Vision, no API key)
+# 2. history: hourly futures candles + funding for the top 10 into ./data (one time, no API key)
 cryptofutures download --start 2024-01-01
 
-# 3. LLM vs baselines on the same data
-cryptofutures benchmark --start 2026-07-01 --end 2026-10-01 --tag first-run
+# 3. backtest + benchmark: decision models vs baselines on the same data
+cryptofutures backtest  --strategy jev --start 2026-09-11 --end 2026-10-11 --decision-hours 24
+cryptofutures benchmark --strategies jev,llm,buy_and_hold,ema_trend,random --start 2026-07-01 --end 2026-10-01
 
-# 4. tune SL/TP/leverage/confidence walk-forward (reuses the cached LLM answers)
-cryptofutures optimize --strategy llm --start 2026-01-01 --end 2026-10-01 --folds 4
+# 4. tune SL/TP/leverage/confidence walk-forward (reuses the cached model answers)
+cryptofutures optimize --strategy jev --start 2026-07-01 --end 2026-10-01 --folds 4
 
 # 5. live paper trading on real-time prices
-cryptofutures paper --strategy llm                 # Binance USD-M
-cryptofutures paper --strategy llm --exchange okx  # if Binance is geo-blocked
+cryptofutures paper --strategy jev                 # Binance USD-M public feed
+cryptofutures paper --strategy jev --exchange okx  # if Binance is geo-blocked
 ```
 
 You can also run `python -m cryptofutures <command>` without installing the package.
 
-## Choosing the local model
+## Choosing the generative model
 
 "Best" depends on your GPU or RAM, so the harness lets you **measure it** rather than guess.
-Every model below works with `--model <tag>`:
+Use `scripts/serve_local.sh` with `LLM_REPO`/`LLM_FILE` set to any GGUF. With Ollama, set
+`[llm] base_url = "http://localhost:11434/v1"` and pass `--model <tag>`:
 
-| Hardware | Suggested Ollama tags |
+| Hardware | Suggested models |
 |---|---|
-| CPU only / 8 GB | `qwen3:4b`, `qwen3:8b` |
-| 16 GB VRAM / unified memory | `gpt-oss:20b` (default; reasoning model, strong at structured output), `qwen3:14b` |
-| 24 GB+ | `qwen3:32b`, `qwen3:30b-a3b` (fast MoE), `deepseek-r1:32b` |
-| 80 GB+ | `gpt-oss:120b`, `qwen3:235b-a22b` |
+| CPU only / 8 GB | Qwen3-4B, Qwen3-8B (Q4_K_M) |
+| 16 GB VRAM / unified memory | `gpt-oss:20b` (reasoning model, strong at structured output), Qwen3-14B |
+| 24 GB+ | Qwen3-32B, Qwen3-30B-A3B (fast MoE), DeepSeek-R1-32B |
+| 80 GB+ | `gpt-oss:120b`, Qwen3-235B-A22B |
 
-Newer families (Qwen 3.x, GLM, DeepSeek) ship often. Check <https://ollama.com/library> and benchmark them yourself:
+Newer families ship often, so benchmark them yourself:
 
 ```bash
-cryptofutures benchmark --strategies llm:gpt-oss:20b,llm:qwen3:14b,llm:qwen3:8b,ema_trend,buy_and_hold \
+cryptofutures benchmark --strategies jev,llm:gpt-oss:20b,llm:qwen3:14b,ema_trend,buy_and_hold \
   --start 2026-07-01 --end 2026-10-01 --tag model-shootout
 ```
 
-Strategy specs use the form `llm:<model>@<prompt_version>`, for example `llm:qwen3:14b@v1`.
-To use llama.cpp instead of Ollama, pass `--base-url http://localhost:8080/v1`.
+Strategy specs: `llm:<model>@<prompt_version>` (for example `llm:qwen3:14b@v1`) and `jev:<model>@<question_set>`.
 
-Speed matters: 10 coins × 6 decisions/day × 90 days is 5,400 calls. Every answer is cached in
+Speed matters: 10 coins × 6 decisions/day × 90 days is 5,400 calls. On a 4-core CPU the Jev-style 2B
+takes about 13 s per decision and Qwen3-1.7B about 30 s; a GPU is 10-50× faster. Every answer is cached in
 `data/llm_cache.sqlite`, keyed by model + prompt. Re-runs, optimizer sweeps and repeated benchmarks
 therefore cost nothing after the first pass. Raise `--concurrency` and set `OLLAMA_NUM_PARALLEL` to match.
 
@@ -118,7 +138,7 @@ See `results/sample/README.md` for details. Run your own benchmarks with a bigge
 cryptofutures/
   data.py        Binance Vision downloader (klines + funding), live candles via ccxt
   features.py    indicators + leak-free market snapshot at decision time
-  strategies/    llm.py (prompting, parsing, cache), baselines.py, base.py
+  strategies/    jev.py (Jev-style typed decisions), llm.py (generative LLM, cache), baselines.py, base.py
   risk.py        model decision -> order (leverage, SL/TP, size), with hard clamps
   engine.py      paper futures exchange + backtest loop
   metrics.py     performance + directional accuracy
@@ -126,6 +146,7 @@ cryptofutures/
   optimize.py    walk-forward risk-parameter tuning
   live.py        real-time paper trader (state persisted in results/live_state.json)
   cli.py         command line
+scripts/         serve_local.sh - download GGUFs once and serve them on 127.0.0.1
 tests/           engine math, liquidation, fees/funding, no-look-ahead, parsing
 config.toml      all settings
 ```

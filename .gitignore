@@ -7,3 +7,4 @@ results/*
 !results/README.md
 !results/sample/
 *.gguf
+models/

@@ -17,6 +17,7 @@ def _overrides(a: argparse.Namespace) -> dict:
         o.setdefault("data", {})["symbols"] = [s.strip().upper() for s in a.symbols.split(",")]
     for key, section, field in [("model", "llm", "model"), ("prompt", "llm", "prompt_version"),
                                 ("base_url", "llm", "base_url"), ("concurrency", "llm", "concurrency"),
+                                ("jev_url", "jev", "base_url"), ("jev_model", "jev", "model"),
                                 ("decision_hours", "risk", "decision_hours"), ("max_leverage", "risk", "max_leverage"),
                                 ("exchange", "live", "exchange")]:
         val = getattr(a, key, None)
@@ -37,6 +38,8 @@ def main(argv: list[str] | None = None) -> None:
         sp.add_argument("--prompt", help="prompt version (v1, v2)")
         sp.add_argument("--base-url", help="OpenAI-compatible endpoint, e.g. http://localhost:11434/v1")
         sp.add_argument("--concurrency", type=int)
+        sp.add_argument("--jev-url", help="Jev-style decision model endpoint, e.g. http://127.0.0.1:8081/v1")
+        sp.add_argument("--jev-model", help="model name on the Jev-style server")
         sp.add_argument("--decision-hours", type=int)
         sp.add_argument("--max-leverage", type=int)
         if period:
@@ -55,7 +58,7 @@ def main(argv: list[str] | None = None) -> None:
 
     sp = sub.add_parser("benchmark", help="run several strategies on the same data and rank them")
     common(sp)
-    sp.add_argument("--strategies", default="llm,buy_and_hold,ema_trend,donchian_breakout,rsi_reversion,random")
+    sp.add_argument("--strategies", default="jev,llm,buy_and_hold,ema_trend,donchian_breakout,rsi_reversion,random")
     sp.add_argument("--tag", default="")
     sp.add_argument("--rank-by", default="sharpe")
 

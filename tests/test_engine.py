@@ -156,3 +156,15 @@ def test_directional_accuracy():
     m = directional_accuracy({"X": d}, {"X": c}, horizon_hours=1)
     assert m["directional_calls"] == 2
     assert m["directional_accuracy"] == pytest.approx(1.0)   # 100->101 up, 102->101 down
+
+
+def test_jev_option_probabilities_renormalise_letters():
+    from cryptofutures.strategies.jev import build_prompt, option_probabilities
+    top = {" B": -0.084, " C": -3.71, " A": -4.12, "\n\n": -6.3}
+    p = option_probabilities(top, 2)
+    assert sum(p) == pytest.approx(1.0)
+    assert p[1] == pytest.approx(0.983, abs=0.002)        # 'positive' in the model card example
+    p3 = option_probabilities({" A": -0.1}, 3)            # missing letters get negligible mass
+    assert p3[0] > 0.98
+    prompt = build_prompt("state", "q?", ["x", "y"])
+    assert prompt.endswith("[Options]\nA. x\nB. y\n\nAnswer:")

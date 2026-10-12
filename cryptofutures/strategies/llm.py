@@ -183,15 +183,61 @@ class LLMClient:
         raise RuntimeError("unreachable")
 
 
-class LLMStrategy(Strategy):
+class SnapshotModelStrategy(Strategy):
+    """A model queried once per (symbol, decision time) on a market snapshot.
+
+    Handles parallel requests, retries, progress logging and the error -> FLAT fallback.
+    """
+    concurrency: int = 1
+
+    def __init__(self):
+        self.stats = {"cached": 0, "queried": 0, "errors": 0}
+
+    def decide_one(self, symbol: str, features: dict) -> Decision:
+        raise NotImplementedError
+
+    def decide(self, symbol: str, store: FeatureStore, times: pd.DatetimeIndex) -> pd.DataFrame:
+        snaps = {t: store.snapshot(t) for t in times}
+        results: dict = {}
+
+        def work(t):
+            f = snaps[t]
+            if f is None:
+                return t, Decision(FLAT, 0.0, reason="warm-up")
+            err: Exception | None = None
+            for attempt in range(3):
+                try:
+                    return t, self.decide_one(symbol, f)
+                except Exception as exc:  # network hiccup or unparsable answer
+                    err = exc
+                    _time.sleep(1 + attempt)
+            self.stats["errors"] += 1
+            log.warning("%s %s: model failed (%s) -> FLAT", symbol, t, err)
+            return t, Decision(FLAT, 0.0, reason=f"error: {err}"[:200])
+
+        started, done = _time.time(), 0
+        with ThreadPoolExecutor(max_workers=max(1, self.concurrency)) as pool:
+            for fut in as_completed([pool.submit(work, t) for t in times]):
+                t, d = fut.result()
+                results[t] = d
+                done += 1
+                if done % 50 == 0 or done == len(times):
+                    log.info("%s %s: %d/%d decisions (%.1fs)", self.name, symbol, done, len(times), _time.time() - started)
+        return decisions_frame(times, [results[t] for t in times])
+
+
+class LLMStrategy(SnapshotModelStrategy):
+    """Generative LLM: writes a JSON decision (action, confidence, leverage, SL, TP)."""
+
     def __init__(self, cfg: LLMConfig, max_leverage: int = 10, decision_hours: int = 4):
+        super().__init__()
         self.cfg = cfg
+        self.concurrency = cfg.concurrency
         self.max_leverage = max_leverage
         self.decision_hours = decision_hours
         self.client = LLMClient(cfg)
         self.cache = DecisionCache(cfg.cache_path)
         self.name = f"llm[{cfg.model}|{cfg.prompt_version}]"
-        self.stats = {"cached": 0, "queried": 0, "errors": 0}
 
     def system_prompt(self) -> str:
         return SYSTEM_PROMPTS[self.cfg.prompt_version].format(max_lev=self.max_leverage, tf=self.decision_hours)
@@ -212,32 +258,3 @@ class LLMStrategy(Strategy):
             self.cache.put(key, self.cfg.model, self.cfg.prompt_version, symbol, str(features["time"]), raw)
             self.stats["queried"] += 1
         return parse_response(raw)
-
-    def decide(self, symbol: str, store: FeatureStore, times: pd.DatetimeIndex) -> pd.DataFrame:
-        snaps = {t: store.snapshot(t) for t in times}
-        results: dict = {}
-
-        def work(t):
-            f = snaps[t]
-            if f is None:
-                return t, Decision(FLAT, 0.0, reason="warm-up")
-            err: Exception | None = None
-            for attempt in range(3):
-                try:
-                    return t, self.decide_one(symbol, f)
-                except Exception as exc:  # network hiccup or unparsable answer
-                    err = exc
-                    _time.sleep(1 + attempt)
-            self.stats["errors"] += 1
-            log.warning("%s %s: LLM failed (%s) -> FLAT", symbol, t, err)
-            return t, Decision(FLAT, 0.0, reason=f"error: {err}"[:200])
-
-        started, done = _time.time(), 0
-        with ThreadPoolExecutor(max_workers=max(1, self.cfg.concurrency)) as pool:
-            for fut in as_completed([pool.submit(work, t) for t in times]):
-                t, d = fut.result()
-                results[t] = d
-                done += 1
-                if done % 50 == 0 or done == len(times):
-                    log.info("%s %s: %d/%d decisions (%.1fs)", self.name, symbol, done, len(times), _time.time() - started)
-        return decisions_frame(times, [results[t] for t in times])

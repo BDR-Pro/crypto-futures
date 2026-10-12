@@ -66,6 +66,27 @@ class LLMConfig:
 
 
 @dataclass
+class JevConfig:
+    # Jev-style decision model (typed choice -> calibrated probabilities, no text generation),
+    # served locally by llama.cpp / llama-cpp-python / LM Studio.
+    backend: str = "local"            # "local": load the GGUF in this process (llama-cpp-python, no server)
+                                       # "server": any OpenAI-compatible server returning top_logprobs
+    model_path: str = "models/Jev-Style-Qwen3.5-2B-Decision-Q8_0.gguf"
+    n_ctx: int = 4096
+    n_threads: int = 0                 # 0 = auto
+    n_gpu_layers: int = 0              # -1 = offload everything to the GPU
+    base_url: str = "http://127.0.0.1:8081/v1"
+    model: str = "jev-style-2b"
+    api_key: str = "local"
+    timeout: float = 120.0
+    concurrency: int = 1
+    question_set: str = "j1"
+    ask_risk: bool = False             # True: also ask leverage / stop width / target (4 questions per trade;
+                                       # use with a GPU). False: leverage from confidence, SL/TP from ATR.
+    cache_path: str = "data/llm_cache.sqlite"
+
+
+@dataclass
 class LiveConfig:
     exchange: str = "binanceusdm"      # any ccxt id; "okx" works where Binance is geo-blocked
     state_path: str = "results/live_state.json"
@@ -78,6 +99,7 @@ class Config:
     exchange: ExchangeConfig = field(default_factory=ExchangeConfig)
     risk: RiskConfig = field(default_factory=RiskConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
+    jev: JevConfig = field(default_factory=JevConfig)
     live: LiveConfig = field(default_factory=LiveConfig)
 
 

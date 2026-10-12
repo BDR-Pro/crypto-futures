@@ -13,6 +13,7 @@ dependencies = ["numpy>=1.26", "pandas>=2.1", "requests>=2.31"]
 
 [project.optional-dependencies]
 live = ["ccxt>=4.2"]
+local = ["llama-cpp-python[server]>=0.3.30"]
 plot = ["matplotlib>=3.8"]
 dev = ["pytest>=8"]
 

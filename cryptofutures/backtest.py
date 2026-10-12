@@ -11,13 +11,20 @@ from .data import MarketData
 from .engine import BacktestResult, run_backtest
 from .features import FeatureStore
 from .metrics import compute_metrics, directional_accuracy
-from .strategies import BASELINES, LLMStrategy, Strategy
+from .strategies import BASELINES, JevStrategy, LLMStrategy, Strategy
 
 log = logging.getLogger(__name__)
 
 
 def make_strategy(name: str, cfg: Config) -> Strategy:
-    """'llm' (uses [llm] config), 'llm:<model>' / 'llm:<model>@<prompt_version>', or a baseline name."""
+    """'llm' / 'llm:<model>[@<prompt_version>]' (generative LLM, [llm] config),
+    'jev' / 'jev:<model>[@<question_set>]' (Jev-style decision model, [jev] config), or a baseline name."""
+    if name.startswith("jev"):
+        jev_cfg = cfg.jev
+        if ":" in name:
+            model, _, qset = name.split(":", 1)[1].partition("@")
+            jev_cfg = replace(jev_cfg, model=model or jev_cfg.model, question_set=qset or jev_cfg.question_set)
+        return JevStrategy(jev_cfg, max_leverage=cfg.risk.max_leverage, decision_hours=cfg.risk.decision_hours)
     if name.startswith("llm"):
         llm_cfg = cfg.llm
         if ":" in name:
@@ -26,7 +33,7 @@ def make_strategy(name: str, cfg: Config) -> Strategy:
             llm_cfg = replace(llm_cfg, model=model or llm_cfg.model, prompt_version=version or llm_cfg.prompt_version)
         return LLMStrategy(llm_cfg, max_leverage=cfg.risk.max_leverage, decision_hours=cfg.risk.decision_hours)
     if name not in BASELINES:
-        raise KeyError(f"unknown strategy {name!r}; choose from llm, {', '.join(BASELINES)}")
+        raise KeyError(f"unknown strategy {name!r}; choose from jev, llm, {', '.join(BASELINES)}")
     return BASELINES[name]()
 
 
@@ -56,7 +63,7 @@ class Workbench:
         out = {}
         for s in self.symbols:
             out[s] = strategy.decide(s, self.stores[s], self.decision_times(s, start, end))
-        if isinstance(strategy, LLMStrategy):
+        if isinstance(strategy, (LLMStrategy, JevStrategy)):
             log.info("%s stats: %s", strategy.name, strategy.stats)
         return out
 
