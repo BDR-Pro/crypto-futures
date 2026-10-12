@@ -92,7 +92,9 @@ therefore cost nothing after the first pass. Raise `--concurrency` and set `OLLA
 3. **Tune the risk layer out-of-sample.** `cryptofutures optimize` searches SL source (model vs ATR),
    ATR multiple, reward:risk, max leverage, confidence threshold, margin per trade and flat behaviour.
    It picks parameters on an expanding training window, scores them on the next unseen window,
-   and reports tuned vs default. It writes `results/best_risk_<strategy>.toml`; paste that into `config.toml`.
+   and reports tuned vs default. The tuned settings are recommended only if they beat the defaults
+   on that unseen data; otherwise it tells you the tuning overfit and keeps your current settings.
+   It writes `results/best_risk_<strategy>.toml`; paste that into `config.toml`.
 4. **Iterate the model side.** Add a prompt version to `SYSTEM_PROMPTS` in
    `cryptofutures/strategies/llm.py` (for example `v3`), or try another model, then benchmark again.
 5. **Track progress.** `cryptofutures history --rank-by sharpe` ranks every run you've done.

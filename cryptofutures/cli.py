@@ -112,7 +112,9 @@ def main(argv: list[str] | None = None) -> None:
         print(f"Out-of-sample ({a.folds - 1} folds) tuned vs default risk settings for {rep['strategy']}:")
         for k in ("tuned", "default"):
             print(f"  {k:8s} " + ", ".join(f"{n}={v:.3f}" for n, v in oos[k].items()))
-        print("Recommended [risk] settings (paste into config.toml):")
+        if not rep["tuning_helps_out_of_sample"]:
+            print("Tuning did NOT beat the current settings on unseen data (it overfit) - keep your current [risk].")
+        print("Recommended [risk] settings (also in results/best_risk_*.toml):")
         print(json.dumps(rep["recommended"], indent=2))
 
     elif a.cmd == "history":

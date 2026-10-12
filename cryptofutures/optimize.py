@@ -87,11 +87,19 @@ def walk_forward(cfg: Config, strategy_name: str, start: str, end: str, folds: i
         log.info("fold %d: train %s..%s best %s=%.3f | test tuned %s=%.3f vs default %.3f", k, tr_a.date(), tr_b.date(),
                  objective, scored[0][0], objective, score(test_best, objective, 0), score(test_default, objective, 0))
 
-    # Final recommendation: tune on the whole period (use for live / next benchmark).
-    final = sorted(((score(evaluate(p, edges[0], edges[-1]), objective, min_trades), p) for p in candidates),
-                   key=lambda x: x[0], reverse=True)
-    report["recommended"] = {**base_risk, **final[0][1]}
-    report["oos_summary"] = _oos_summary(report["folds"], objective)
+    report["oos_summary"] = oos = _oos_summary(report["folds"], objective)
+    # Only trust tuning that also won on unseen data; otherwise keep the current settings.
+    tuning_helps = (oos["tuned"][f"mean_{objective}"] > oos["default"][f"mean_{objective}"]
+                    and oos["tuned"]["compounded_return"] > oos["default"]["compounded_return"])
+    report["tuning_helps_out_of_sample"] = tuning_helps
+    if tuning_helps:
+        # Re-tune on the whole period for the setting to use going forward.
+        final = sorted(((score(evaluate(p, edges[0], edges[-1]), objective, min_trades), p) for p in candidates),
+                       key=lambda x: x[0], reverse=True)
+        report["recommended"] = {**base_risk, **final[0][1]}
+    else:
+        log.warning("tuned settings did not beat the defaults out-of-sample (overfitting) - keeping current [risk]")
+        report["recommended"] = base_risk
 
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)

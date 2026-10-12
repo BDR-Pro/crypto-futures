@@ -8,6 +8,7 @@ Within a candle, if both the stop and the target could have been hit, the stop
 """
 from __future__ import annotations
 
+import functools
 from dataclasses import asdict, dataclass, field
 
 import numpy as np
@@ -170,8 +171,7 @@ def run_backtest(cfg: Config, candles: dict[str, pd.DataFrame], funding: dict[st
     """
     risk = cfg.risk
     acct = Account(cfg=cfg, cash=cfg.exchange.initial_equity)
-    index = sorted(set().union(*[c.index for c in candles.values()]))
-    index = pd.DatetimeIndex(index)
+    index = functools.reduce(pd.Index.union, [c.index for c in candles.values()])
     if start is not None:
         index = index[index >= utc(start)]
     if end is not None:
