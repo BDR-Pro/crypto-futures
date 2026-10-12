@@ -101,6 +101,17 @@ therefore cost nothing after the first pass. Raise `--concurrency` and set `OLLA
 
 Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve-fitting.
 
+## Sample results
+
+`results/sample/` holds two runs made while building this repo:
+
+- A 2-year baseline leaderboard. Only buy-and-hold finished positive, with a 63% drawdown.
+- A smoke test of a real local model: Qwen3-1.7B on CPU, 5 coins, 15 days. The tiny model had no directional
+  edge and over-used leverage. The walk-forward optimizer then cut its leverage to 1x and raised the confidence
+  filter, which reduced the out-of-sample loss from −11.3% to −1.7%.
+
+See `results/sample/README.md` for details. Run your own benchmarks with a bigger model and a longer window.
+
 ## Layout
 
 ```

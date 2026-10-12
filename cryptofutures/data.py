@@ -134,15 +134,28 @@ class MarketData:
         return self._read(path)["rate"]
 
 
-def fetch_live_candles(exchange, symbol: str, timeframe: str = "1h", limit: int = 1000) -> pd.DataFrame:
-    """Fetch recent candles with a ccxt exchange instance. `symbol` is like BTCUSDT."""
-    market = to_ccxt_symbol(symbol)
-    rows = exchange.fetch_ohlcv(market, timeframe=timeframe, limit=limit)
+def fetch_live_candles(exchange, symbol: str, timeframe: str = "1h", limit: int = 1000,
+                       since: int | None = None) -> pd.DataFrame:
+    """Recent candles via a ccxt exchange instance. `symbol` is like BTCUSDT, `since` in ms.
+
+    On Binance USD-M the raw kline endpoint is used so taker-buy volume matches the
+    historical data the model was benchmarked on; other venues don't publish it and
+    get a neutral 50% taker-buy ratio.
+    """
+    if exchange.id == "binanceusdm":
+        params = {"symbol": symbol, "interval": timeframe, "limit": min(limit, 1500)}
+        if since is not None:
+            params["startTime"] = since
+        df = pd.DataFrame(exchange.fapiPublicGetKlines(params), columns=KLINE_COLS)
+        df["time"] = pd.to_datetime(df["open_time"].astype("int64"), unit="ms", utc=True)
+        return df.set_index("time")[["open", "high", "low", "close", "volume", "quote_volume",
+                                     "taker_buy_quote"]].astype(float)
+    rows = exchange.fetch_ohlcv(to_ccxt_symbol(symbol), timeframe=timeframe, since=since, limit=limit)
     df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close", "volume"])
     df["time"] = pd.to_datetime(df["time"], unit="ms", utc=True)
     df = df.set_index("time").astype(float)
     df["quote_volume"] = df["volume"] * df["close"]
-    df["taker_buy_quote"] = df["quote_volume"] / 2  # not provided by OHLCV endpoint
+    df["taker_buy_quote"] = df["quote_volume"] / 2
     return df
 
 

@@ -83,19 +83,13 @@ class LivePaperTrader:
         have = self.candles.get(symbol)
         if have is None:
             frames, since = [], int((now - pd.Timedelta(hours=HISTORY_HOURS)).timestamp() * 1000)
-            while True:
-                rows = self.exchange.fetch_ohlcv(to_ccxt_symbol(symbol), "1h", since=since, limit=1000)
-                if not rows:
+            while since < now.timestamp() * 1000:
+                chunk = fetch_live_candles(self.exchange, symbol, "1h", limit=1000, since=since)
+                if chunk.empty:
                     break
-                frames.append(rows)
-                since = rows[-1][0] + 3_600_000
-                if since >= now.timestamp() * 1000:
-                    break
-            df = pd.DataFrame([r for f in frames for r in f], columns=["time", "open", "high", "low", "close", "volume"])
-            df["time"] = pd.to_datetime(df["time"], unit="ms", utc=True)
-            df = df.set_index("time").astype(float)
-            df["quote_volume"] = df["volume"] * df["close"]
-            df["taker_buy_quote"] = df["quote_volume"] / 2
+                frames.append(chunk)
+                since = int(chunk.index[-1].timestamp() * 1000) + 3_600_000
+            df = pd.concat(frames)
         else:
             df = pd.concat([have, fetch_live_candles(self.exchange, symbol, "1h", limit=10)])
         df = df[~df.index.duplicated(keep="last")].sort_index()
