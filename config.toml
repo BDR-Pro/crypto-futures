@@ -1,0 +1,46 @@
+# cryptofutures configuration. Every key is optional; defaults live in cryptofutures/config.py.
+
+[data]
+symbols = ["BTCUSDT", "ETHUSDT", "XRPUSDT", "BNBUSDT", "SOLUSDT",
+           "DOGEUSDT", "TRXUSDT", "ADAUSDT", "LINKUSDT", "AVAXUSDT"]
+start = "2024-01-01"          # history to download (EMA200 needs ~7 months of warm-up)
+data_dir = "data"
+
+[exchange]
+initial_equity = 10000.0      # paper USDT
+taker_fee = 0.0005            # 0.05% per side
+slippage = 0.0002             # 2 bps against you on market fills
+maint_margin_rate = 0.005
+use_funding = true
+
+[risk]
+decision_hours = 4            # ask the model every 4h (4h candles + daily context)
+max_leverage = 10             # hard cap whatever the model asks for
+default_leverage = 3          # used when the model gives none
+sizing = "margin"             # "margin": margin_per_trade x leverage = position size | "risk": lose risk_per_trade at SL
+margin_per_trade = 0.08       # 8% of equity posted as margin per position
+risk_per_trade = 0.01
+sl_source = "model"           # "model": use the LLM's SL/TP (clamped) | "atr": ATR-based SL, TP = reward_risk x SL
+atr_sl_mult = 1.5
+reward_risk = 2.0
+min_sl_pct = 0.004
+max_sl_pct = 0.08
+min_confidence = 0.55         # skip entries the model is not confident about
+flat_closes = true            # FLAT closes an open position
+max_open_positions = 10
+
+[llm]
+# Any OpenAI-compatible server: Ollama (default), llama.cpp server, vLLM, LM Studio.
+base_url = "http://localhost:11434/v1"
+model = "gpt-oss:20b"
+temperature = 0.0
+max_tokens = 600
+concurrency = 2               # parallel requests (set OLLAMA_NUM_PARALLEL to match)
+prompt_version = "v2"
+reasoning_effort = "low"
+cache_path = "data/llm_cache.sqlite"
+
+[live]
+exchange = "binanceusdm"      # any ccxt id; use "okx" if Binance is blocked in your region
+state_path = "results/live_state.json"
+log_path = "results/live_trades.csv"

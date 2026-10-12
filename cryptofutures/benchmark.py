@@ -1,0 +1,104 @@
+"""Benchmark suite: run several strategies on identical data, rank them, and keep
+a running history so every prompt / model / risk change can be compared."""
+from __future__ import annotations
+
+import json
+import logging
+from dataclasses import asdict
+from datetime import datetime, timezone
+from pathlib import Path
+
+import pandas as pd
+
+from .backtest import Workbench, make_strategy
+from .config import Config
+from .metrics import per_symbol
+
+log = logging.getLogger(__name__)
+
+COLUMNS = ["strategy", "total_return", "cagr", "sharpe", "sortino", "max_drawdown", "calmar", "trades",
+           "win_rate", "profit_factor", "avg_leverage", "liquidations", "directional_accuracy", "final_equity"]
+PCT = {"total_return", "cagr", "max_drawdown", "win_rate", "directional_accuracy"}
+
+
+def format_table(df: pd.DataFrame) -> str:
+    cols = [c for c in COLUMNS if c in df.columns]
+    lines = ["| " + " | ".join(cols) + " |", "|" + "---|" * len(cols)]
+    for _, r in df[cols].iterrows():
+        cells = []
+        for c in cols:
+            v = r[c]
+            if isinstance(v, str):
+                cells.append(v)
+            elif v is None or v != v:
+                cells.append("-")
+            elif c in PCT:
+                cells.append(f"{v * 100:.1f}%")
+            elif c in ("trades", "liquidations"):
+                cells.append(f"{int(v)}")
+            else:
+                cells.append(f"{v:.2f}")
+        lines.append("| " + " | ".join(cells) + " |")
+    return "\n".join(lines)
+
+
+def run_benchmark(cfg: Config, strategies: list[str], start: str, end: str, out_dir: str | Path = "results",
+                  tag: str = "", rank_by: str = "sharpe") -> tuple[pd.DataFrame, Path]:
+    stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+    run_dir = Path(out_dir) / f"{stamp}{'_' + tag if tag else ''}"
+    run_dir.mkdir(parents=True, exist_ok=True)
+    wb = Workbench(cfg)
+    rows, curves = [], {}
+    for name in strategies:
+        strat = make_strategy(name, cfg)
+        log.info("running %s on %d symbols %s -> %s", strat.name, len(wb.symbols), start, end)
+        res, m = wb.run(strat, start=start, end=end)
+        rows.append({"strategy": strat.name, **m})
+        curves[strat.name] = res.equity
+        safe = strat.name.replace("/", "_").replace(":", "_").replace("|", "_")
+        if not res.trades.empty:
+            res.trades.to_csv(run_dir / f"trades_{safe}.csv", index=False)
+            per_symbol(res.trades).to_csv(run_dir / f"symbols_{safe}.csv")
+        pd.concat([d.assign(symbol=s) for s, d in res.decisions.items()]).to_csv(run_dir / f"decisions_{safe}.csv")
+
+    board = pd.DataFrame(rows).sort_values(rank_by, ascending=False).reset_index(drop=True)
+    board.to_csv(run_dir / "leaderboard.csv", index=False)
+    pd.DataFrame(curves).resample("1D").last().to_csv(run_dir / "equity_daily.csv")
+    header = (f"# Benchmark {stamp}{' - ' + tag if tag else ''}\n\n"
+              f"Period: {start} -> {end} | Symbols: {', '.join(wb.symbols)} | "
+              f"Decision every {cfg.risk.decision_hours}h | Start equity {cfg.exchange.initial_equity:,.0f} USDT\n\n"
+              f"Risk: {json.dumps(asdict(cfg.risk))}\n\n")
+    (run_dir / "leaderboard.md").write_text(header + format_table(board) + "\n")
+    _plot(curves, run_dir / "equity.png")
+
+    with open(Path(out_dir) / "history.jsonl", "a") as fh:
+        for r in rows:
+            fh.write(json.dumps({"run": run_dir.name, "start": start, "end": end, "symbols": wb.symbols,
+                                 "risk": asdict(cfg.risk), "llm_model": cfg.llm.model, **r}, default=float) + "\n")
+    return board, run_dir
+
+
+def load_history(out_dir: str | Path = "results") -> pd.DataFrame:
+    path = Path(out_dir) / "history.jsonl"
+    if not path.exists():
+        return pd.DataFrame()
+    return pd.DataFrame([json.loads(line) for line in path.read_text().splitlines() if line.strip()])
+
+
+def _plot(curves: dict[str, pd.Series], path: Path) -> None:
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except ImportError:
+        return
+    fig, ax = plt.subplots(figsize=(11, 5.5))
+    for name, s in curves.items():
+        s.resample("1D").last().plot(ax=ax, label=name, lw=1.4)
+    ax.set_ylabel("equity (USDT)")
+    ax.set_title("Paper-trading equity")
+    ax.grid(alpha=0.3)
+    ax.legend(fontsize=8)
+    fig.tight_layout()
+    fig.savefig(path, dpi=110)
+    plt.close(fig)

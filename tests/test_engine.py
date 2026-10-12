@@ -1,0 +1,158 @@
+import numpy as np
+import pandas as pd
+import pytest
+
+from cryptofutures.config import Config, ExchangeConfig, RiskConfig, with_risk
+from cryptofutures.engine import Account, run_backtest
+from cryptofutures.features import FeatureStore, resample
+from cryptofutures.risk import plan_order
+from cryptofutures.strategies.llm import parse_response
+
+
+def candles(prices, start="2025-01-01", spread=0.0):
+    """Hourly candles; each row is (open, high, low, close) or a single price."""
+    idx = pd.date_range(start, periods=len(prices), freq="h", tz="UTC")
+    rows = [p if isinstance(p, tuple) else (p, p * (1 + spread), p * (1 - spread), p) for p in prices]
+    df = pd.DataFrame(rows, index=idx, columns=["open", "high", "low", "close"])
+    df["volume"] = 1.0
+    df["quote_volume"] = df["close"]
+    df["taker_buy_quote"] = df["close"] / 2
+    return df
+
+
+def decisions(times, action, **kw):
+    row = {"action": action, "confidence": 1.0, "leverage": kw.get("leverage", 5),
+           "sl_pct": kw.get("sl_pct", 0.02), "tp_pct": kw.get("tp_pct", 0.04), "reason": ""}
+    return pd.DataFrame([row] * len(times), index=pd.DatetimeIndex(times))
+
+
+def no_cost_cfg(**risk) -> Config:
+    cfg = Config(exchange=ExchangeConfig(taker_fee=0.0, slippage=0.0, use_funding=False))
+    return with_risk(cfg, sl_source="model", min_confidence=0.0, **risk)
+
+
+def run(cfg, c, d, **kw):
+    atr = {"X": pd.Series(0.01, index=d.index)}
+    return run_backtest(cfg, {"X": c}, {"X": pd.Series(dtype=float)}, {"X": d}, atr, **kw)
+
+
+def test_long_take_profit_pnl():
+    c = candles([100, 100, 101, (101, 105, 101, 104), 104])
+    d = decisions([c.index[1]], "LONG")
+    res = run(no_cost_cfg(margin_per_trade=0.1), c, d)
+    tr = res.trades.iloc[0]
+    assert tr.exit_reason == "take_profit"
+    assert tr.exit == pytest.approx(104.0)
+    # notional = 10_000 * 0.1 * 5 = 5000 at 100 -> 50 units * +4 = +200
+    assert tr.pnl == pytest.approx(200.0)
+    assert res.equity.iloc[-1] == pytest.approx(10_200.0)
+
+
+def test_stop_assumed_before_target_in_same_candle():
+    c = candles([100, 100, (100, 106, 97, 100), 100])
+    res = run(no_cost_cfg(), c, decisions([c.index[1]], "LONG"))
+    assert res.trades.iloc[0].exit_reason == "stop_loss"
+    assert res.trades.iloc[0].exit == pytest.approx(98.0)
+
+
+def test_short_stop_gap_fills_at_open():
+    c = candles([100, 100, (110, 111, 109, 110), 110])
+    res = run(no_cost_cfg(), c, decisions([c.index[1]], "SHORT"))
+    tr = res.trades.iloc[0]
+    assert tr.side == "SHORT" and tr.exit_reason == "stop_loss"
+    assert tr.exit == pytest.approx(110.0)      # gapped through the 102 stop
+
+
+def test_liquidation_without_stop_loses_exactly_margin():
+    c = candles([100, 100, (100, 100, 70, 72), 72])
+    res = run(no_cost_cfg(margin_per_trade=0.1), c, decisions([c.index[1]], "LONG", leverage=5),
+              use_stops=False)
+    tr = res.trades.iloc[0]
+    assert tr.exit_reason == "liquidation"
+    assert tr.pnl == pytest.approx(-1000.0)     # whole isolated margin, nothing more
+    assert res.equity.iloc[-1] == pytest.approx(9000.0)
+
+
+def test_fees_and_slippage_are_charged():
+    cfg = Config(exchange=ExchangeConfig(taker_fee=0.001, slippage=0.0, use_funding=False))
+    cfg = with_risk(cfg, min_confidence=0.0)
+    c = candles([100] * 6)
+    d = decisions([c.index[1], c.index[3]], "LONG")
+    d.iloc[1, d.columns.get_loc("action")] = "FLAT"
+    res = run(cfg, c, d)
+    tr = res.trades.iloc[0]
+    assert tr.exit_reason == "signal_flat"
+    assert tr.pnl == pytest.approx(-2 * 0.001 * 10_000 * 0.08 * 5)
+
+
+def test_funding_long_pays_positive_rate():
+    acct = Account(cfg=no_cost_cfg(), cash=1000)
+    plan = plan_order(1, {"leverage": 2}, 0.01, 1000, 1000, RiskConfig(margin_per_trade=0.5), ExchangeConfig(slippage=0))
+    acct.open("X", plan, 100.0, pd.Timestamp("2025-01-01", tz="UTC"), 1.0, "")
+    cash = acct.cash
+    acct.apply_funding("X", 0.0001, 100.0)
+    assert acct.cash == pytest.approx(cash - 1000 * 0.0001)
+
+
+def test_risk_layer_keeps_stop_inside_liquidation():
+    risk = RiskConfig(max_leverage=50, sl_source="model", max_sl_pct=0.08)
+    plan = plan_order(1, {"leverage": 50, "sl_pct": 0.05, "tp_pct": 0.1}, 0.01, 10_000, 10_000, risk, ExchangeConfig())
+    liq_distance = 1 / plan.leverage - ExchangeConfig().maint_margin_rate
+    assert plan.sl_pct < liq_distance
+    assert plan.leverage <= 50
+
+
+def test_risk_layer_clamps_crazy_model_output():
+    risk = RiskConfig(max_leverage=10, max_sl_pct=0.08, min_sl_pct=0.004)
+    plan = plan_order(-1, {"leverage": 125, "sl_pct": 0.9, "tp_pct": None}, 0.01, 10_000, 10_000, risk, ExchangeConfig())
+    assert plan.leverage <= 10 and plan.sl_pct == pytest.approx(0.08)
+    assert plan.tp_pct == pytest.approx(risk.reward_risk * 0.08)
+
+
+def test_low_confidence_does_not_open():
+    cfg = no_cost_cfg()
+    cfg = with_risk(cfg, min_confidence=0.6)
+    c = candles([100] * 5)
+    d = decisions([c.index[1]], "LONG")
+    d["confidence"] = 0.3
+    assert run(cfg, c, d).trades.empty
+
+
+def test_features_have_no_lookahead():
+    rng = np.random.default_rng(0)
+    prices = 100 * np.exp(np.cumsum(rng.normal(0, 0.01, 24 * 260)))
+    c = candles(list(prices), spread=0.002)
+    t = c.index[24 * 250]
+    snap = FeatureStore(c, 4).snapshot(t)
+    future_changed = c.copy()
+    future_changed.loc[t:, ["open", "high", "low", "close"]] *= 3   # wildly different future
+    snap2 = FeatureStore(future_changed, 4).snapshot(t)
+    for k in snap:
+        assert snap[k] == snap2[k], k
+
+
+def test_resample_drops_incomplete_bar():
+    c = candles([100] * 10)              # 10 hours -> two complete 4h bars, one partial
+    assert len(resample(c, 4)) == 2
+
+
+@pytest.mark.parametrize("text,action,sl", [
+    ('{"action":"long","confidence":0.7,"leverage":3,"stop_loss_pct":2,"take_profit_pct":4,"reason":"x"}', "LONG", 0.02),
+    ('<think>hmm</think>\nSure: {"action":"SHORT","confidence":80,"leverage":2,"stop_loss_pct":1.5,"take_profit_pct":3}', "SHORT", 0.015),
+    ('{"action":"BUY","confidence":0.9}', "FLAT", None),
+])
+def test_parse_response(text, action, sl):
+    d = parse_response(text)
+    assert d.action == action
+    assert 0 <= d.confidence <= 1
+    assert (d.sl_pct == pytest.approx(sl)) if sl else d.sl_pct is None
+
+
+def test_directional_accuracy():
+    from cryptofutures.metrics import directional_accuracy
+    c = candles([100, 101, 102, 101, 100, 99])
+    d = pd.DataFrame({"action": ["LONG", "SHORT", "FLAT"], "confidence": [0.9, 0.6, 0.5]},
+                     index=c.index[[0, 2, 3]])
+    m = directional_accuracy({"X": d}, {"X": c}, horizon_hours=1)
+    assert m["directional_calls"] == 2
+    assert m["directional_accuracy"] == pytest.approx(1.0)   # 100->101 up, 102->101 down
