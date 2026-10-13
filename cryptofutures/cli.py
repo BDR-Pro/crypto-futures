@@ -82,6 +82,13 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--seed", type=int, default=0)
     sp.add_argument("--tag", default="")
 
+    sp = sub.add_parser("leverage", help="replay strategies at forced leverage levels (incl. extreme) per guard mode")
+    common(sp)
+    sp.add_argument("--strategies", default="nimble,buy_and_hold")
+    sp.add_argument("--levels", default="1,2,3,5,10,20,50,100")
+    sp.add_argument("--guards", default="reduce_leverage,tighten_stop,off")
+    sp.add_argument("--tag", default="")
+
     sp = sub.add_parser("history", help="show every benchmark run so far, best first")
     sp.add_argument("--rank-by", default="sharpe")
     sp.add_argument("--top", type=int, default=20)
@@ -153,6 +160,14 @@ def main(argv: list[str] | None = None) -> None:
         print(f"\nchampion: {champ['strategy']} (robust score {champ['robust_score']*100:+.2f})"
               + (" - NEW" if promoted else " - unchanged"))
         print(f"results: {out}/")
+
+    elif a.cmd == "leverage":
+        from .benchmark import format_leverage_table, leverage_sweep
+        df, run_dir = leverage_sweep(cfg, [x.strip() for x in a.strategies.split(",")],
+                                     [int(x) for x in a.levels.split(",")], [g.strip() for g in a.guards.split(",")],
+                                     a.start, a.end, tag=a.tag)
+        print(format_leverage_table(df))
+        print(f"\nresults: {run_dir}/")
 
     elif a.cmd == "history":
         from .benchmark import format_table, load_history

@@ -29,9 +29,12 @@ def _valid(x) -> bool:
 def plan_order(side: int, decision: dict, atr_pct: float, equity: float, free_margin: float,
                risk: RiskConfig, ex: ExchangeConfig, use_stops: bool = True,
                fixed_leverage: int | None = None) -> OrderPlan | None:
-    lev = fixed_leverage or decision.get("leverage")
-    lev = int(lev) if _valid(lev) else risk.default_leverage
-    lev = max(1, min(risk.max_leverage, lev))
+    if risk.leverage_override:
+        lev = int(risk.leverage_override)
+    else:
+        lev = fixed_leverage or decision.get("leverage")
+        lev = int(lev) if _valid(lev) else risk.default_leverage
+        lev = max(1, min(risk.max_leverage, lev))
 
     sl = tp = None
     if use_stops:
@@ -46,8 +49,16 @@ def plan_order(side: int, decision: dict, atr_pct: float, equity: float, free_ma
         else:
             tp = risk.reward_risk * sl
         # Stop must trigger before liquidation: 1/lev - mmr is the liquidation distance.
-        max_lev_for_sl = math.floor(1 / (sl + ex.maint_margin_rate + LIQ_BUFFER))
-        lev = max(1, min(lev, max_lev_for_sl))
+        if risk.liq_guard == "reduce_leverage":
+            max_lev_for_sl = math.floor(1 / (sl + ex.maint_margin_rate + LIQ_BUFFER))
+            lev = max(1, min(lev, max_lev_for_sl))
+        elif risk.liq_guard == "tighten_stop":
+            room = 1 / lev - ex.maint_margin_rate - LIQ_BUFFER
+            if room < 0.0005:          # no room for any stop at this leverage
+                return None
+            if sl > room:
+                tp = tp * room / sl     # keep the same reward:risk
+                sl = room
 
     if risk.sizing == "risk" and sl:
         notional = equity * risk.risk_per_trade / sl
@@ -55,9 +66,10 @@ def plan_order(side: int, decision: dict, atr_pct: float, equity: float, free_ma
     else:
         notional = equity * risk.margin_per_trade * lev
 
-    margin = notional / lev
-    if margin > free_margin:
-        notional = max(free_margin, 0) * lev
+    # Margin plus the opening fee must come out of the free wallet balance.
+    cost_per_notional = 1 / lev + ex.taker_fee
+    if notional * cost_per_notional > free_margin:
+        notional = max(free_margin, 0) / cost_per_notional
     if notional < 10:  # exchange minimum notional
         return None
     return OrderPlan(side=side, leverage=lev, notional=notional, sl_pct=sl, tp_pct=tp)

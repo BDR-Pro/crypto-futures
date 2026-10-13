@@ -81,8 +81,10 @@ class Account:
         return self.cash + self.unrealized(marks)
 
     def free_margin(self, marks: dict[str, float]) -> float:
+        """Wallet balance not tied up as margin. Unrealized profit can't be posted as isolated
+        margin, and unrealized losses are already bounded by each position's own margin."""
         used = sum(p.margin for p in self.positions.values())
-        return self.equity(marks) - used
+        return self.cash - used
 
     # ---- order handling --------------------------------------------------
     def open(self, symbol: str, plan, price: float, t: pd.Timestamp, confidence: float, reason: str) -> None:
