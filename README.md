@@ -142,6 +142,10 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
+- **What beats buy-and-hold:** over Sep 2024 → Oct 2026, a daily EMA trend rule at 1x made +31.5% vs +9.7%
+  with half the drawdown, and its timing is significant (p = 0.01). It wins in crashes by shorting and trails in
+  most rallies. Qwen v4 beat buy-and-hold by 35 points in the late-2025 bear market. See
+  `results/sample/beats-buy-and-hold/`.
 - **Hold-position prompt (v4), Qwen3.6-27B, 10 coins, 90 days:** +19.1% (v2: +5.0%, buy-and-hold +28.5%), holding
   trades 7 days instead of 2.5. Timing still not significant (p = 0.28). See `results/sample/qwen-v4-hold-90d/`.
 - **Leverage sweep (1x–100x):** up to ~5x leverage scales results; past 10x it destroys them, and at 50–100x
