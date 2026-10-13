@@ -155,14 +155,27 @@ class LLMClient:
         self.session = requests.Session()
         self._format_mode = "json_schema"
 
-    def api_key(self) -> str:
+    def is_openrouter(self) -> bool:
         host = urlparse(self.cfg.base_url).hostname or ""
-        if host == "openrouter.ai" or host.endswith(".openrouter.ai"):
-            key = os.environ.get(self.cfg.api_key_env, "")
-            if not key:
-                raise RuntimeError(f"OpenRouter needs an API key: export {self.cfg.api_key_env}=sk-or-...")
-            return key
+        return host == "openrouter.ai" or host.endswith(".openrouter.ai")
+
+    def api_key(self) -> str:
+        if self.is_openrouter():
+            # Real key from the environment, or a placeholder that an egress proxy holding the
+            # key as a network secret swaps in. The key is only ever sent to openrouter.ai.
+            return os.environ.get(self.cfg.api_key_env) or "proxy-injected"
         return self.cfg.api_key
+
+    def check_auth(self) -> None:
+        """Fail fast on a missing or rejected hosted-API key instead of trading on errors."""
+        if not self.is_openrouter():
+            return
+        resp = self.session.get(self.cfg.base_url.rstrip("/") + "/key",
+                                headers={"Authorization": f"Bearer {self.api_key()}"}, timeout=30)
+        if resp.status_code in (401, 403):
+            raise RuntimeError(f"OpenRouter rejected the API key (HTTP {resp.status_code}). Set {self.cfg.api_key_env}, "
+                               "or a network secret bound to the host openrouter.ai.")
+        resp.raise_for_status()
 
     def _payload(self, messages, mode):
         p = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature,
@@ -247,7 +260,7 @@ class LLMStrategy(SnapshotModelStrategy):
         self.max_leverage = max_leverage
         self.decision_hours = decision_hours
         self.client = LLMClient(cfg)
-        self.client.api_key()   # fail fast on a missing hosted-API key instead of trading on errors
+        self.client.check_auth()
         self.cache = DecisionCache(cfg.cache_path)
         self.name = f"llm[{cfg.model}|{cfg.prompt_version}]"
 

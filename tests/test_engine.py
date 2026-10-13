@@ -194,6 +194,5 @@ def test_openrouter_key_only_sent_to_openrouter(monkeypatch):
     assert LLMClient(LLMConfig(base_url="https://openrouter.ai/api/v1")).api_key() == "sk-or-test"
     assert LLMClient(LLMConfig(base_url="http://127.0.0.1:8080/v1")).api_key() == "local"
     assert LLMClient(LLMConfig(base_url="https://openrouter.ai.evil.com/v1")).api_key() == "local"
-    monkeypatch.delenv("OPENROUTER_API_KEY")
-    with pytest.raises(RuntimeError):
-        LLMClient(LLMConfig(base_url="https://openrouter.ai/api/v1")).api_key()
+    monkeypatch.delenv("OPENROUTER_API_KEY")   # network-secret setup: proxy swaps the placeholder
+    assert LLMClient(LLMConfig(base_url="https://openrouter.ai/api/v1")).api_key() == "proxy-injected"

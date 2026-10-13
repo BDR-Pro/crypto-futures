@@ -101,7 +101,7 @@ Everything above runs locally. To try models too big for your machine, point the
 answer-token logits from their own weights.
 
 ```bash
-export OPENROUTER_API_KEY=sk-or-...        # read from the environment, only ever sent to openrouter.ai
+export OPENROUTER_API_KEY=sk-or-...        # or a network secret bound to openrouter.ai; only sent there
 cryptofutures benchmark --base-url https://openrouter.ai/api/v1 \
   --strategies "llm:openai/gpt-oss-120b,llm:qwen/qwen3.6-27b,nimble,buy_and_hold" --start 2026-09-26 --end 2026-10-11
 ```
