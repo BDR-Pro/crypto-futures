@@ -1,0 +1,78 @@
+# cryptofutures configuration. Every key is optional; defaults live in cryptofutures/config.py.
+
+[data]
+symbols = ["BTCUSDT", "ETHUSDT", "XRPUSDT", "BNBUSDT", "SOLUSDT",
+           "DOGEUSDT", "TRXUSDT", "ADAUSDT", "LINKUSDT", "AVAXUSDT"]
+start = "2024-01-01"          # history to download (EMA200 needs ~7 months of warm-up)
+data_dir = "data"
+
+[exchange]
+initial_equity = 10000.0      # paper USDT
+taker_fee = 0.0005            # 0.05% per side
+slippage = 0.0002             # 2 bps against you on market fills
+maint_margin_rate = 0.005
+use_funding = true
+
+[risk]
+decision_hours = 4            # ask the model every 4h (4h candles + daily context)
+max_leverage = 10             # hard cap whatever the model asks for
+default_leverage = 3          # used when the model gives none
+sizing = "margin"             # "margin": margin_per_trade x leverage = position size | "risk": lose risk_per_trade at SL
+margin_per_trade = 0.08       # 8% of equity posted as margin per position
+risk_per_trade = 0.01
+sl_source = "model"           # "model": use the LLM's SL/TP (clamped) | "atr": ATR-based SL, TP = reward_risk x SL
+atr_sl_mult = 1.5
+reward_risk = 2.0
+min_sl_pct = 0.004
+max_sl_pct = 0.08
+min_confidence = 0.55         # skip entries the model is not confident about
+flat_closes = true            # FLAT closes an open position
+max_open_positions = 10
+
+[nimble]
+# Bespoke-Nimble-9B v3 (Bespoke Labs): Qwen3.5-9B decision model, the default decision strategy ("nimble").
+# Loaded in-process from the GGUF (get it once: scripts/serve_local.sh download). Licence: CC BY-NC 4.0.
+model_path = "models/Bespoke-Nimble-9B-v3-Q4_K_M.gguf"
+n_threads = 0                 # 0 = auto
+n_gpu_layers = 0              # -1 = everything on the GPU (needs a GPU build of llama-cpp-python)
+temperature = 1.0             # softmax over candidate logits, Bespoke's default
+schema_version = "n1"
+ask_risk = true               # the model also picks leverage, stop (x ATR) and target (x stop); costs little
+                              # extra because all fields share one evaluated prompt prefix
+cache_path = "data/llm_cache.sqlite"
+
+[jev]
+# Jev-style decision model: typed question -> calibrated probability per option, no text generation.
+# Strategy name: "jev". Get the weights once with `scripts/serve_local.sh download`.
+backend = "local"             # "local": load the GGUF in-process (no server, fastest)
+                              # "server": an OpenAI-compatible server returning top_logprobs (llama-server, LM Studio)
+model_path = "models/Jev-Style-Qwen3.5-2B-Decision-Q8_0.gguf"
+n_threads = 0                 # 0 = auto
+n_gpu_layers = 0              # -1 = everything on the GPU (needs a GPU build of llama-cpp-python)
+base_url = "http://127.0.0.1:8081/v1"
+model = "jev-style-2b"
+concurrency = 1
+question_set = "j1"
+ask_risk = false              # true: the model also picks leverage, stop width and target (4 questions/trade,
+                              # use with a GPU); false: leverage scales with its confidence, SL/TP from ATR
+cache_path = "data/llm_cache.sqlite"
+
+[llm]
+# Generative LLM writing a JSON decision. Strategy name: "llm".
+# Local llama.cpp from scripts/serve_local.sh; for Ollama use base_url = "http://localhost:11434/v1"
+# and a tag such as model = "gpt-oss:20b" or "qwen3:8b".
+# Hosted option: base_url = "https://openrouter.ai/api/v1", model = "openai/gpt-oss-120b",
+# key from the OPENROUTER_API_KEY environment variable (never stored in this file).
+base_url = "http://127.0.0.1:8080/v1"
+model = "local-llm"
+temperature = 0.0
+max_tokens = 600
+concurrency = 1               # parallel requests the local server can take
+prompt_version = "v2"
+reasoning_effort = "low"
+cache_path = "data/llm_cache.sqlite"
+
+[live]
+exchange = "binanceusdm"      # any ccxt id; use "okx" if Binance is blocked in your region
+state_path = "results/live_state.json"
+log_path = "results/live_trades.csv"
