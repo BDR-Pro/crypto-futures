@@ -270,3 +270,53 @@ def test_cache_only_never_calls_model(tmp_path):
     store = FeatureStore(c, 24)
     d = st.decide("X", store, store.decision_times()[:3])
     assert (d.action == "FLAT").all() and st.stats["missing"] == 3
+
+
+def test_hold_prompt_schema_and_parsing():
+    from cryptofutures.strategies.llm import RESPONSE_SCHEMA, response_schema
+    assert "HOLD" not in RESPONSE_SCHEMA["properties"]["action"]["enum"]
+    assert "HOLD" in response_schema("v4")["properties"]["action"]["enum"]
+    assert parse_response('{"action":"HOLD","confidence":0.7}').action == "HOLD"
+
+
+def test_hold_keeps_open_position_through_flat_free_days():
+    c = candles([100, 100, 101, 102, 103, 104, 105])
+    d = decisions(c.index[1:5], "HOLD", tp_pct=0.5)
+    d.iloc[0, d.columns.get_loc("action")] = "LONG"
+    res = run(no_cost_cfg(), c, d)
+    assert len(res.trades) == 1 and res.trades.iloc[0].exit_reason == "end_of_test"
+
+
+@pytest.mark.parametrize("guard,expect_lev", [("reduce_leverage", None), ("tighten_stop", 100), ("off", 100)])
+def test_leverage_override_and_liquidation_guard(guard, expect_lev):
+    risk = RiskConfig(leverage_override=100, liq_guard=guard, sl_source="model", reward_risk=2.0)
+    ex = ExchangeConfig()
+    plan = plan_order(1, {"leverage": 3, "sl_pct": 0.03, "tp_pct": 0.06}, 0.01, 10_000, 10_000, risk, ex)
+    liq_distance = 1 / plan.leverage - ex.maint_margin_rate
+    if guard == "reduce_leverage":
+        assert plan.leverage < 100 and plan.sl_pct == pytest.approx(0.03) and plan.sl_pct < liq_distance
+    elif guard == "tighten_stop":
+        assert plan.leverage == expect_lev and plan.sl_pct < liq_distance
+        assert plan.tp_pct / plan.sl_pct == pytest.approx(2.0)
+    else:
+        assert plan.leverage == expect_lev and plan.sl_pct == pytest.approx(0.03) and plan.sl_pct > liq_distance
+
+
+def test_extreme_leverage_without_guard_gets_liquidated():
+    c = candles([100, 100, (100, 100.5, 98.5, 99), 99])      # 1.5% dip
+    cfg = with_risk(no_cost_cfg(), leverage_override=100, liq_guard="off")
+    res = run(cfg, c, decisions([c.index[1]], "LONG", sl_pct=0.03))
+    assert res.trades.iloc[0].exit_reason == "liquidation"
+
+
+def test_liquidation_cascade_never_goes_below_zero():
+    """100x buy-and-hold through a crash: every position is liquidated, the account must not go negative."""
+    prices = [100.0] * 30 + [100 - i for i in range(1, 30)]          # steady fall after day 1
+    c = candles(prices)
+    cfg = Config(exchange=ExchangeConfig(slippage=0.0, use_funding=False))
+    cfg = with_risk(cfg, leverage_override=100, liq_guard="off", min_confidence=0.0, margin_per_trade=0.5)
+    d = decisions(c.index[1:], "LONG")                               # re-enters after every liquidation
+    res = run(cfg, c, d, use_stops=False)
+    assert (res.trades.exit_reason == "liquidation").sum() >= 2
+    assert res.equity.min() >= 0
+    assert (res.trades.pnl >= -(res.trades.margin + res.trades.fees) - 1e-6).all()

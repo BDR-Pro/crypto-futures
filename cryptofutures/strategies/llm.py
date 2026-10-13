@@ -23,7 +23,7 @@ import requests
 
 from ..config import LLMConfig
 from ..features import FeatureStore
-from .base import FLAT, LONG, SHORT, Decision, Strategy, decisions_frame
+from .base import FLAT, HOLD, LONG, SHORT, Decision, Strategy, decisions_frame
 
 log = logging.getLogger(__name__)
 
@@ -86,7 +86,41 @@ SYSTEM_PROMPTS = {
         '"stop_loss_pct": number (percent, e.g. 2.5), "take_profit_pct": number (percent), '
         '"reason": "max 25 words: the decisive bull or bear argument"}}'
     ),
+    "v4": (
+        "You are a disciplined quantitative crypto futures trader managing one USDT-margined perpetual. "
+        "Every {tf}h you review the market and give one instruction for the next {tf}h: LONG, SHORT, HOLD or FLAT.\n"
+        "LONG / SHORT = you want that exposure now (opens it, or flips an opposite position). "
+        "HOLD = keep whatever position is already open, unchanged (or stay out if none is open). "
+        "FLAT = actively close any position and stay out.\n"
+        "Rules:\n"
+        "1. Let winners run. In an established trend (daily price above/below EMA50 with returns in that direction), "
+        "the right answer is usually to be positioned with the trend and to HOLD it. Pullbacks within a trend are "
+        "normal: answer HOLD, not FLAT. Do not exit a trend just because momentum cooled for a day.\n"
+        "2. Use FLAT only when the trend has clearly broken (daily close through EMA50 against the position, "
+        "momentum reversed) or risk is extreme. Use HOLD when nothing material has changed.\n"
+        "3. Enter LONG in uptrends and SHORT in downtrends; in a choppy range with no trend, answer HOLD or FLAT.\n"
+        "4. Stops for trend trades sit beyond normal noise, typically 2-3x ATR%; take-profit far enough to let the "
+        "trend run, at least 3x the stop. Leverage 1-{max_lev}, inversely proportional to volatility, with "
+        "leverage x stop_loss_pct <= 15.\n"
+        "5. confidence is your calibrated probability (0-1) that the position is right over the next days.\n"
+        "Reply with a single JSON object and nothing else: "
+        '{{"action": "LONG|SHORT|HOLD|FLAT", "confidence": number, "leverage": integer, '
+        '"stop_loss_pct": number (percent, e.g. 2.5), "take_profit_pct": number (percent), '
+        '"reason": "max 25 words"}}'
+    ),
 }
+
+
+# Prompt versions whose answer may be HOLD (keep whatever position is open).
+HOLD_PROMPTS = {"v4"}
+
+
+def response_schema(version: str) -> dict:
+    if version not in HOLD_PROMPTS:
+        return RESPONSE_SCHEMA
+    schema = json.loads(json.dumps(RESPONSE_SCHEMA))
+    schema["properties"]["action"]["enum"] = [LONG, SHORT, FLAT, HOLD]
+    return schema
 
 
 def _pct(x: float) -> str:
@@ -121,7 +155,7 @@ def parse_response(text: str) -> Decision:
         raise ValueError(f"no JSON object in response: {text[:200]!r}")
     obj = json.loads(match.group(0))
     action = str(obj.get("action", FLAT)).upper().strip()
-    if action not in (LONG, SHORT, FLAT):
+    if action not in (LONG, SHORT, FLAT, HOLD):
         action = FLAT
 
     def num(key, default=None):
@@ -209,9 +243,9 @@ class LLMClient:
             p["reasoning_effort"] = self.cfg.reasoning_effort
         if mode == "json_schema":
             p["response_format"] = {"type": "json_schema",
-                                    "json_schema": {"name": "decision", "schema": RESPONSE_SCHEMA}}
+                                    "json_schema": {"name": "decision", "schema": response_schema(self.cfg.prompt_version)}}
         elif mode == "json_object":
-            p["response_format"] = {"type": "json_object", "schema": RESPONSE_SCHEMA}
+            p["response_format"] = {"type": "json_object", "schema": response_schema(self.cfg.prompt_version)}
         return p
 
     def _post(self, url: str, payload: dict, headers: dict, attempts: int = 6) -> requests.Response:

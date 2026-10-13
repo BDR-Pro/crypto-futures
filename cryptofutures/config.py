@@ -48,6 +48,9 @@ class RiskConfig:
     min_confidence: float = 0.55       # ignore signals below this confidence
     flat_closes: bool = True           # a FLAT decision closes an open position
     max_open_positions: int = 10
+    leverage_override: int = 0         # >0: force this leverage on every trade (leverage experiments)
+    liq_guard: str = "reduce_leverage" # keep the stop inside liquidation by: "reduce_leverage" |
+                                       # "tighten_stop" (keep leverage, pull the stop in) | "off" (liquidations happen)
 
 
 @dataclass
