@@ -44,7 +44,7 @@ Its licence is non-commercial; for commercial use, the Apache-2.0 Jev-Style 2B (
 | **Model input** | Trend, momentum, volatility, range, volume and taker flow on the decision timeframe; daily trend context; funding rate; the last 12 closes. Only closed candles go in, so the model never sees the future. |
 | **Risk layer** | Caps leverage. Clamps SL to a min/max. Keeps the SL inside the liquidation price. Filters by confidence. Sizes by margin or by risk. |
 | **Paper exchange** | Isolated margin. 0.05% taker fee and 2 bps slippage. 8h funding from real history. SL, TP and liquidation are checked on hourly candles. If SL and TP hit in the same candle, the SL is assumed to fill first. Gaps fill at the open. |
-| **Baselines** | `buy_and_hold`, `ema_trend`, `donchian_breakout`, `rsi_reversion`, `random`, `flat` |
+| **Baselines** | `buy_and_hold`, `ema_trend`, `donchian_breakout`, `rsi_reversion`, `trend_filter_long`, `trend_long_short`, `random`, `flat` |
 | **Metrics** | Return, CAGR, Sharpe, Sortino, max drawdown, Calmar, win rate, profit factor, liquidations, fees, funding. Also directional accuracy (forecasting skill without the risk layer) and accuracy on high-confidence calls. |
 
 ## Quick start (all local)
@@ -142,6 +142,10 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
+- **What beats buy-and-hold:** over Sep 2024 → Oct 2026, a daily EMA trend rule at 1x that lets winners run
+  (no take-profit, ATR stop) made +90.5% vs buy-and-hold +9.7%, Sharpe 1.11 vs 0.39, max drawdown −28% vs −63%.
+  Timing p = 0.01; walk-forward picks the same settings without hindsight. Ready-made config:
+  `results/sample/beats-buy-and-hold/ema_trend_ride.toml`. Details in `results/sample/beats-buy-and-hold/`.
 - **Hold-position prompt (v4), Qwen3.6-27B, 10 coins, 90 days:** +19.1% (v2: +5.0%, buy-and-hold +28.5%), holding
   trades 7 days instead of 2.5. Timing still not significant (p = 0.28). See `results/sample/qwen-v4-hold-90d/`.
 - **Leverage sweep (1x–100x):** up to ~5x leverage scales results; past 10x it destroys them, and at 50–100x

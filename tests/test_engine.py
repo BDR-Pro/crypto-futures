@@ -320,3 +320,14 @@ def test_liquidation_cascade_never_goes_below_zero():
     assert (res.trades.exit_reason == "liquidation").sum() >= 2
     assert res.equity.min() >= 0
     assert (res.trades.pnl >= -(res.trades.margin + res.trades.fees) - 1e-6).all()
+
+
+def test_long_biased_trend_rules_only_emit_their_actions():
+    from cryptofutures.features import FeatureStore
+    from cryptofutures.strategies.baselines import TrendFilterLong, TrendLongShort
+    rng = np.random.default_rng(5)
+    c = candles(list(100 * np.exp(np.cumsum(rng.normal(0, 0.01, 24 * 400)))), spread=0.002)
+    store = FeatureStore(c, 24)
+    times = store.decision_times()
+    assert set(TrendFilterLong().decide("X", store, times).action) <= {"LONG", "FLAT"}
+    assert set(TrendLongShort().decide("X", store, times).action) <= {"LONG", "SHORT"}

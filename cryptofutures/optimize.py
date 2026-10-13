@@ -22,8 +22,8 @@ log = logging.getLogger(__name__)
 
 SEARCH_SPACE = {
     "sl_source": ["model", "atr"],
-    "atr_sl_mult": [1.0, 1.5, 2.0, 3.0],
-    "reward_risk": [1.0, 1.5, 2.0, 3.0],
+    "atr_sl_mult": [1.0, 1.5, 2.0, 3.0, 4.0],
+    "reward_risk": [1.0, 1.5, 2.0, 3.0, 100.0],   # 100 = effectively no take-profit (let winners run)
     "max_leverage": [1, 2, 3, 5, 10],
     "min_confidence": [0.0, 0.55, 0.65, 0.75],
     "margin_per_trade": [0.04, 0.08, 0.15],

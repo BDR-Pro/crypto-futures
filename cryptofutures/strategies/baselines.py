@@ -100,4 +100,26 @@ class RsiReversion(Strategy):
         return _frame(times, actions, confidence=0.6, reason="rsi reversion")
 
 
-BASELINES = {cls.name: cls for cls in (BuyAndHold, Flat, RandomStrategy, EmaTrend, DonchianBreakout, RsiReversion)}
+class TrendFilterLong(Strategy):
+    """Buy-and-hold with a bear-market exit: long while price is above its long EMA, flat below."""
+    name = "trend_filter_long"
+
+    def decide(self, symbol, store, times):
+        b = _aligned_bars(store, times)
+        actions = np.where(b["close"] > b["ema200"], LONG, FLAT)
+        return _frame(times, actions, confidence=0.7, reason="above/below EMA200")
+
+
+class TrendLongShort(Strategy):
+    """Long by default (keeps buy-and-hold's upside); short only in a confirmed downtrend."""
+    name = "trend_long_short"
+
+    def decide(self, symbol, store, times):
+        b = _aligned_bars(store, times)
+        down = (b["close"] < b["ema200"]) & (b["ema20"] < b["ema50"])
+        actions = np.where(down, SHORT, LONG)
+        return _frame(times, actions, confidence=0.7, reason="long unless confirmed downtrend")
+
+
+BASELINES = {cls.name: cls for cls in (BuyAndHold, Flat, RandomStrategy, EmaTrend, DonchianBreakout, RsiReversion,
+                                       TrendFilterLong, TrendLongShort)}

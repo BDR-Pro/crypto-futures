@@ -150,5 +150,86 @@
     },
     "robust_score": 0.013903849801437551,
     "crowned": "2026-10-13T15:43:37.654661+00:00"
+  },
+  "2024-09-01..2026-10-11|24h|ADAUSDT,AVAXUSDT,BNBUSDT,BTCUSDT,DOGEUSDT,ETHUSDT,LINKUSDT,SOLUSDT,TRXUSDT,XRPUSDT": {
+    "strategy": "buy_and_hold",
+    "spec": "buy_and_hold",
+    "period": [
+      "2024-09-01",
+      "2026-10-11"
+    ],
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "XRPUSDT",
+      "BNBUSDT",
+      "SOLUSDT",
+      "DOGEUSDT",
+      "TRXUSDT",
+      "ADAUSDT",
+      "LINKUSDT",
+      "AVAXUSDT"
+    ],
+    "risk": {
+      "decision_hours": 24,
+      "max_leverage": 10,
+      "default_leverage": 3,
+      "sizing": "margin",
+      "margin_per_trade": 0.08,
+      "risk_per_trade": 0.01,
+      "sl_source": "model",
+      "atr_sl_mult": 1.5,
+      "reward_risk": 2.0,
+      "min_sl_pct": 0.004,
+      "max_sl_pct": 0.08,
+      "min_confidence": 0.55,
+      "flat_closes": true,
+      "max_open_positions": 10,
+      "leverage_override": 1,
+      "liq_guard": "reduce_leverage"
+    },
+    "seed": 11,
+    "metrics": {
+      "total_return": 0.09685377321204802,
+      "sharpe": 0.3862452477888939,
+      "max_drawdown": -0.6309073201501301,
+      "trades": 10,
+      "win_rate": 0.4,
+      "avg_leverage": 1.0,
+      "directional_accuracy": 0.4957142857142857
+    },
+    "buy_and_hold_return": 0.09685377321204802,
+    "timing_permutation": {
+      "observed": 0.09685377321204802,
+      "null_mean": 0.09685377321204804,
+      "null_p05": 0.09685377321204802,
+      "null_p95": 0.09685377321204802,
+      "p_value": 1.0
+    },
+    "trade_bootstrap": {
+      "n_trades": 10,
+      "return_p05": -0.1431726585717075,
+      "return_p50": 0.09376915451750367,
+      "return_p95": 0.37180900470271994,
+      "prob_positive": 0.7105
+    },
+    "random_windows": {
+      "n": 60,
+      "window_days": 60,
+      "coins_per_window": 6,
+      "beat_buy_hold_share": 0.0,
+      "excess_median": 0.0,
+      "excess_p10": 0.0,
+      "excess_p90": 0.0
+    },
+    "risk_perturbation": {
+      "n": 20,
+      "return_median": 0.09685377321204802,
+      "return_p10": 0.048425847596809124,
+      "return_p90": 0.28219619561076503,
+      "positive_share": 1.0
+    },
+    "robust_score": 0.0,
+    "crowned": "2026-10-13T19:30:48.494444+00:00"
   }
 }
