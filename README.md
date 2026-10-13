@@ -142,6 +142,10 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
+- **Hold-position prompt (v4), Qwen3.6-27B, 10 coins, 90 days:** +19.1% (v2: +5.0%, buy-and-hold +28.5%), holding
+  trades 7 days instead of 2.5. Timing still not significant (p = 0.28). See `results/sample/qwen-v4-hold-90d/`.
+- **Leverage sweep (1x–100x):** up to ~5x leverage scales results; past 10x it destroys them, and at 50–100x
+  everything blows up. See `results/sample/leverage-90d/`.
 - **90 days, top-3 hosted models, all 10 coins:** buy-and-hold +28.5%, Qwen3.6-27B +5.0% (the only model in profit),
   gpt-oss-120b −3.0%, DeepSeek −11.2%. Randomized tests: no model's timing is significant on 10 coins
   (Qwen p = 0.64), and the models sat out ~70% of the rally. See `results/sample/top3-90d/`.
@@ -158,6 +162,15 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 So far no small model shows an edge. The harness is there to find out whether bigger models
 (JEV-9B/27B, gpt-oss-20b, Qwen3-32B on a GPU) do. See `results/sample/README.md` for details.
+
+## Leverage experiments
+
+```bash
+cryptofutures leverage --cache-only --strategies "llm:qwen/qwen3.6-27b@v4,buy_and_hold" \
+  --levels 1,2,3,5,10,20,50,100 --guards reduce_leverage,tighten_stop,off
+```
+
+Replays cached decisions at forced leverage. `[risk] leverage_override` and `liq_guard` set the same thing in config.
 
 ## Randomized robustness tests and the champion
 
