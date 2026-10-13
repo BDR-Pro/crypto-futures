@@ -5,13 +5,15 @@
 # Weights are downloaded once into ./models; after that nothing leaves your machine.
 #
 # Usage: scripts/serve_local.sh [jev|llm|both|download]   (default: both)
-#   download: only fetch the GGUFs (the default [jev] backend loads the file in-process, no server)
+#   download: only fetch the GGUFs. The decision models (nimble, jev) load in-process; no server needed.
 # Env:   LLM_REPO / LLM_FILE to pick another GGUF, THREADS, CTX, GPU_LAYERS (-1 = all on GPU)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 MODELS=models
 mkdir -p "$MODELS" results
 
+NIMBLE_REPO=${NIMBLE_REPO:-ggml-org/Bespoke-Nimble-9B-v3-GGUF}   # CC BY-NC 4.0: non-commercial use only
+NIMBLE_FILE=${NIMBLE_FILE:-Bespoke-Nimble-9B-v3-Q4_K_M.gguf}
 JEV_REPO=${JEV_REPO:-chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-GGUF}
 JEV_FILE=${JEV_FILE:-Jev-Style-Qwen3.5-2B-Decision-Q8_0.gguf}
 LLM_REPO=${LLM_REPO:-Qwen/Qwen3-8B-GGUF}
@@ -38,7 +40,7 @@ serve() {  # file alias port
 }
 
 what=${1:-both}
-if [ "$what" = download ]; then fetch "$JEV_REPO" "$JEV_FILE"; fetch "$LLM_REPO" "$LLM_FILE"; exit 0; fi
+if [ "$what" = download ]; then fetch "$NIMBLE_REPO" "$NIMBLE_FILE"; fetch "$JEV_REPO" "$JEV_FILE"; fetch "$LLM_REPO" "$LLM_FILE"; exit 0; fi
 if [ "$what" = jev ] || [ "$what" = both ]; then fetch "$JEV_REPO" "$JEV_FILE"; serve "$JEV_FILE" jev-style-2b 8081; fi
 if [ "$what" = llm ] || [ "$what" = both ]; then fetch "$LLM_REPO" "$LLM_FILE"; serve "$LLM_FILE" local-llm 8080; fi
 echo "servers running - press Ctrl+C to stop them"

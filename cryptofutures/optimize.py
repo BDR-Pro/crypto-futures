@@ -62,7 +62,7 @@ def walk_forward(cfg: Config, strategy_name: str, start: str, end: str, folds: i
     log.info("computing decisions for %s once (cached for LLMs)", strat.name)
     decisions = wb.decisions(strat, start, end)
     edges = pd.date_range(utc(start), utc(end), periods=folds + 1)
-    candidates = _candidates(n_trials, seed, uses_model_stops=strat.name.startswith(("llm", "jev")))
+    candidates = _candidates(n_trials, seed, uses_model_stops=strat.name.startswith(("llm", "jev", "nimble")))
     base_risk = asdict(cfg.risk)
 
     def evaluate(params: dict, a, b) -> dict:

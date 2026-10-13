@@ -168,3 +168,20 @@ def test_jev_option_probabilities_renormalise_letters():
     assert p3[0] > 0.98
     prompt = build_prompt("state", "q?", ["x", "y"])
     assert prompt.endswith("[Options]\nA. x\nB. y\n\nAnswer:")
+
+
+def test_nimble_prompt_matches_bespoke_format():
+    import json as _json
+    from cryptofutures.strategies.nimble import MARKER, SCHEMAS, softmax, user_content
+    schema = {k: (d.format(tf=4), o) for k, (d, o) in SCHEMAS["n1"].items()}
+    content = user_content("BTC <up>", schema)
+    body, requested = content.split("\n\nRequested field: ")
+    assert requested == MARKER
+    assert "<" not in body                                    # escaped like Bespoke's safe_json
+    obj = _json.loads(body)
+    assert obj["context"] == "BTC <up>"
+    pos = obj["schema"][0]
+    assert pos["name"] == "position" and [c["code"] for c in pos["choices"]] == ["A", "B", "C"]
+    assert [c["value"] for c in pos["choices"]] == ["LONG", "SHORT", "FLAT"]
+    p = softmax([2.0, 1.0, 0.0], 1.0)
+    assert sum(p) == pytest.approx(1.0) and p[0] > p[1] > p[2]

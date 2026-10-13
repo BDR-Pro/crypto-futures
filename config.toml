@@ -29,6 +29,18 @@ min_confidence = 0.55         # skip entries the model is not confident about
 flat_closes = true            # FLAT closes an open position
 max_open_positions = 10
 
+[nimble]
+# Bespoke-Nimble-9B v3 (Bespoke Labs): Qwen3.5-9B decision model, the default decision strategy ("nimble").
+# Loaded in-process from the GGUF (get it once: scripts/serve_local.sh download). Licence: CC BY-NC 4.0.
+model_path = "models/Bespoke-Nimble-9B-v3-Q4_K_M.gguf"
+n_threads = 0                 # 0 = auto
+n_gpu_layers = 0              # -1 = everything on the GPU (needs a GPU build of llama-cpp-python)
+temperature = 1.0             # softmax over candidate logits, Bespoke's default
+schema_version = "n1"
+ask_risk = true               # the model also picks leverage, stop (x ATR) and target (x stop); costs little
+                              # extra because all fields share one evaluated prompt prefix
+cache_path = "data/llm_cache.sqlite"
+
 [jev]
 # Jev-style decision model: typed question -> calibrated probability per option, no text generation.
 # Strategy name: "jev". Get the weights once with `scripts/serve_local.sh download`.

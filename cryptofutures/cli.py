@@ -54,17 +54,17 @@ def main(argv: list[str] | None = None) -> None:
 
     sp = sub.add_parser("backtest", help="run one strategy")
     common(sp)
-    sp.add_argument("--strategy", default="llm")
+    sp.add_argument("--strategy", default="nimble")
 
     sp = sub.add_parser("benchmark", help="run several strategies on the same data and rank them")
     common(sp)
-    sp.add_argument("--strategies", default="jev,llm,buy_and_hold,ema_trend,donchian_breakout,rsi_reversion,random")
+    sp.add_argument("--strategies", default="nimble,jev,llm,buy_and_hold,ema_trend,donchian_breakout,rsi_reversion,random")
     sp.add_argument("--tag", default="")
     sp.add_argument("--rank-by", default="sharpe")
 
     sp = sub.add_parser("optimize", help="walk-forward tuning of SL/TP/leverage/confidence on cached decisions")
     common(sp)
-    sp.add_argument("--strategy", default="llm")
+    sp.add_argument("--strategy", default="nimble")
     sp.add_argument("--folds", type=int, default=4)
     sp.add_argument("--trials", type=int, default=60)
     sp.add_argument("--objective", default="sharpe", choices=["sharpe", "sortino", "calmar", "total_return", "return_dd"])
@@ -75,7 +75,7 @@ def main(argv: list[str] | None = None) -> None:
 
     sp = sub.add_parser("paper", help="live paper trading on real-time prices (no real orders)")
     common(sp, period=False)
-    sp.add_argument("--strategy", default="llm")
+    sp.add_argument("--strategy", default="nimble")
     sp.add_argument("--exchange", help="ccxt exchange id: binanceusdm, okx, bybit, ...")
     sp.add_argument("--poll", type=int, default=30)
 

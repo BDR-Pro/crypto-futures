@@ -87,6 +87,21 @@ class JevConfig:
 
 
 @dataclass
+class NimbleConfig:
+    # Bespoke-Nimble-9B (Bespoke Labs): Qwen3.5-9B decision model, open alternative to Jev.
+    # Loaded in-process from a GGUF with llama-cpp-python; nothing leaves the machine.
+    model_path: str = "models/Bespoke-Nimble-9B-v3-Q4_K_M.gguf"
+    n_ctx: int = 4096
+    n_threads: int = 0                 # 0 = auto
+    n_gpu_layers: int = 0              # -1 = offload everything to the GPU
+    temperature: float = 1.0           # softmax temperature on candidate logits (Bespoke's default)
+    schema_version: str = "n1"
+    ask_risk: bool = True              # also score leverage / stop / target fields (cheap: shared prefix)
+    concurrency: int = 1
+    cache_path: str = "data/llm_cache.sqlite"
+
+
+@dataclass
 class LiveConfig:
     exchange: str = "binanceusdm"      # any ccxt id; "okx" works where Binance is geo-blocked
     state_path: str = "results/live_state.json"
@@ -100,6 +115,7 @@ class Config:
     risk: RiskConfig = field(default_factory=RiskConfig)
     llm: LLMConfig = field(default_factory=LLMConfig)
     jev: JevConfig = field(default_factory=JevConfig)
+    nimble: NimbleConfig = field(default_factory=NimbleConfig)
     live: LiveConfig = field(default_factory=LiveConfig)
 
 

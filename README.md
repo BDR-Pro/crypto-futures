@@ -6,8 +6,8 @@ plus **leverage**, **stop-loss** and **take-profit**. A risk layer clamps those 
 exchange fills the orders. A benchmark harness scores each model against rule-based baselines,
 and a walk-forward optimizer tunes the risk settings so each run can improve on the last.
 
-**Everything runs on your machine.** The models are GGUF files served by llama.cpp (or Ollama / LM Studio)
-on `127.0.0.1`. Market history is downloaded once into `data/`. After that, backtests, benchmarks and the
+**Everything runs on your machine.** The models are GGUF files run by llama.cpp, either loaded in-process
+(the decision models) or served on `127.0.0.1` (the generative LLM). Market history is downloaded once into `data/`. After that, backtests, benchmarks and the
 optimizer need no internet and no API keys. Only live paper trading reads prices from an exchange's public
 feed, because real-time prices can't come from anywhere else.
 
@@ -22,18 +22,19 @@ feed, because real-time prices can't come from anywhere else.
                                                               optimize (walk-forward) ─> better [risk] config
 ```
 
-## Two kinds of decision model
+## Decision models
 
-| Strategy | Model type | How it decides |
+| Strategy | Model | How it decides |
 |---|---|---|
-| `jev` | **Jev-style decision model**: a "System 1" model like TypeSafe's Jev, open-weight reproduction. Default: `chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-GGUF` (Apache-2.0). | It does not write text. It reads the market state plus a typed question with declared options, and returns a **calibrated probability for each option** from a single token. The direction question gives P(LONG), P(SHORT), P(FLAT); the most likely option is the action and its probability is the confidence. With `ask_risk = true` it also picks leverage, stop width (in ATR) and target (multiple of the stop). With `ask_risk = false` (fast on CPU), leverage scales with confidence and SL/TP come from ATR. The GGUF loads in-process with llama-cpp-python and only the last token's logits are computed: about 13 s per decision on 4 CPU cores. `backend = "server"` uses llama-server or LM Studio instead. |
+| `nimble` (default) | **Bespoke-Nimble-9B v3** by Bespoke Labs: a Qwen3.5-9B LoRA, an open alternative to TypeSafe's Jev. GGUF: `ggml-org/Bespoke-Nimble-9B-v3-GGUF` (Q4_K_M, 6.3 GB). **Licence: CC BY-NC 4.0, non-commercial use only.** | It does not write text. The market state goes in as context with a typed schema of four fields: `position` (LONG/SHORT/FLAT), `leverage` (1/2/3/5/10x), `stop_loss` (1–3× ATR) and `take_profit` (1–3× the stop). For each field it scores the allowed answer letters and returns softmax probabilities, using Bespoke's exact prompt format. The most likely `position` is the action and its probability is the confidence. The model also picks leverage, SL and TP. All four fields share one evaluated prompt prefix: the model state is snapshotted after the shared part, so the extra fields cost seconds, not minutes. Runs in-process with llama-cpp-python: about 80 s per decision on 4 CPU cores, far less on a GPU (`n_gpu_layers = -1`). |
+| `jev` | **Jev-Style 2B**: `chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-GGUF` (Apache-2.0), a smaller Jev-style model. | Same idea with its own prompt format: one typed question per call, answered as calibrated probabilities from a single token. By default only direction is asked; leverage scales with confidence and SL/TP come from ATR. About 13 s per decision on CPU. |
 | `llm` | Generative LLM (Qwen3, gpt-oss, DeepSeek, ...) | Writes a JSON decision: `action`, `confidence`, `leverage`, `stop_loss_pct`, `take_profit_pct`, `reason`. |
 
-About Jev: TypeSafe AI released Jev on 15 Sep 2026 as a closed, hosted decision API. Open-weight clones followed
-within days, mostly built on Qwen3.5 with a LoRA adapter and a decision head. Examples are `autotrust/JEV-9B` / `JEV-27B`
-(vLLM, GPU), `jaredpalmer/kev-*`, `openjev/openjev` (non-commercial licence), `TokenRhythm/NeoHorse-Jev-4B` and the
-`chaoliangUNSW/Jev-Style-*` GGUFs. The Jev-Style v1 GGUF is used here because stock llama.cpp runs it directly, through
-token log-probs. The v3 GGUFs score higher but need a custom scorer built against a pinned llama.cpp commit.
+About Jev: TypeSafe AI released Jev on 15 Sep 2026 as a closed, hosted decision API. Open-weight alternatives followed
+within days, mostly built on Qwen3.5 with a LoRA adapter. Bespoke Labs' Nimble is the default here: it ships an official
+llama.cpp GGUF, and Bespoke published the model, training recipe and evaluation setup. Its v3 scores 56.88 on Decision Index 0.2.1.
+Its licence is non-commercial; for commercial use, the Apache-2.0 Jev-Style 2B (`jev`) is the alternative here. Other options include
+`autotrust/JEV-9B` / `JEV-27B` (vLLM, GPU) and `jaredpalmer/kev-*`.
 
 ## What it does
 
@@ -51,8 +52,8 @@ token log-probs. The v3 GGUFs score higher but need a custom scorer built agains
 ```bash
 pip install -e ".[local,live,plot,dev]"
 
-# 1. local models: download the GGUFs into ./models once.
-#    The Jev-style model then loads in-process (no server). The generative LLM is served on 127.0.0.1:8080.
+# 1. local models: download the GGUFs into ./models once (Nimble 6.3 GB, Jev-Style 2.1 GB, Qwen3-8B 5 GB).
+#    The decision models (nimble, jev) load in-process, no server. The generative LLM is served on 127.0.0.1:8080.
 scripts/serve_local.sh download
 scripts/serve_local.sh llm &          # only needed for the `llm` strategy; GPU_LAYERS=-1 offloads to a GPU
 
@@ -60,15 +61,15 @@ scripts/serve_local.sh llm &          # only needed for the `llm` strategy; GPU_
 cryptofutures download --start 2024-01-01
 
 # 3. backtest + benchmark: decision models vs baselines on the same data
-cryptofutures backtest  --strategy jev --start 2026-09-11 --end 2026-10-11 --decision-hours 24
-cryptofutures benchmark --strategies jev,llm,buy_and_hold,ema_trend,random --start 2026-07-01 --end 2026-10-01
+cryptofutures backtest  --strategy nimble --start 2026-09-26 --end 2026-10-11 --decision-hours 24
+cryptofutures benchmark --strategies nimble,jev,llm,buy_and_hold,ema_trend,random --start 2026-07-01 --end 2026-10-01
 
 # 4. tune SL/TP/leverage/confidence walk-forward (reuses the cached model answers)
-cryptofutures optimize --strategy jev --start 2026-07-01 --end 2026-10-01 --folds 4
+cryptofutures optimize --strategy nimble --start 2026-07-01 --end 2026-10-01 --folds 4
 
 # 5. live paper trading on real-time prices
-cryptofutures paper --strategy jev                 # Binance USD-M public feed
-cryptofutures paper --strategy jev --exchange okx  # if Binance is geo-blocked
+cryptofutures paper --strategy nimble              # Binance USD-M public feed
+cryptofutures paper --strategy nimble --exchange okx  # if Binance is geo-blocked
 ```
 
 You can also run `python -m cryptofutures <command>` without installing the package.
@@ -89,11 +90,12 @@ Use `scripts/serve_local.sh` with `LLM_REPO`/`LLM_FILE` set to any GGUF. With Ol
 Newer families ship often, so benchmark them yourself:
 
 ```bash
-cryptofutures benchmark --strategies jev,llm:gpt-oss:20b,llm:qwen3:14b,ema_trend,buy_and_hold \
+cryptofutures benchmark --strategies nimble,jev,llm:gpt-oss:20b,llm:qwen3:14b,ema_trend,buy_and_hold \
   --start 2026-07-01 --end 2026-10-01 --tag model-shootout
 ```
 
-Strategy specs: `llm:<model>@<prompt_version>` (for example `llm:qwen3:14b@v1`) and `jev:<model>@<question_set>`.
+Strategy specs: `llm:<model>@<prompt_version>` (for example `llm:qwen3:14b@v1`), `jev:<model>@<question_set>`
+and `nimble:<path to gguf>@<schema>`.
 
 Speed matters: 10 coins × 6 decisions/day × 90 days is 5,400 calls. On a 4-core CPU the Jev-style 2B
 takes about 13 s per decision and Qwen3-1.7B about 30 s; a GPU is 10-50× faster. Every answer is cached in
@@ -142,7 +144,7 @@ So far no small model shows an edge. The harness is there to find out whether bi
 cryptofutures/
   data.py        Binance Vision downloader (klines + funding), live candles via ccxt
   features.py    indicators + leak-free market snapshot at decision time
-  strategies/    jev.py (Jev-style typed decisions), llm.py (generative LLM, cache), baselines.py, base.py
+  strategies/    nimble.py (Bespoke-Nimble), jev.py (Jev-Style), llm.py (generative LLM, cache), baselines.py, base.py
   risk.py        model decision -> order (leverage, SL/TP, size), with hard clamps
   engine.py      paper futures exchange + backtest loop
   metrics.py     performance + directional accuracy

@@ -11,14 +11,21 @@ from .data import MarketData
 from .engine import BacktestResult, run_backtest
 from .features import FeatureStore
 from .metrics import compute_metrics, directional_accuracy
-from .strategies import BASELINES, JevStrategy, LLMStrategy, Strategy
+from .strategies import BASELINES, JevStrategy, LLMStrategy, NimbleStrategy, Strategy
 
 log = logging.getLogger(__name__)
 
 
 def make_strategy(name: str, cfg: Config) -> Strategy:
-    """'llm' / 'llm:<model>[@<prompt_version>]' (generative LLM, [llm] config),
+    """'nimble' / 'nimble:<gguf path>[@<schema>]' (Bespoke-Nimble decision model, [nimble] config),
+    'llm' / 'llm:<model>[@<prompt_version>]' (generative LLM, [llm] config),
     'jev' / 'jev:<model>[@<question_set>]' (Jev-style decision model, [jev] config), or a baseline name."""
+    if name.startswith("nimble"):
+        nb_cfg = cfg.nimble
+        if ":" in name:
+            path, _, schema = name.split(":", 1)[1].partition("@")
+            nb_cfg = replace(nb_cfg, model_path=path or nb_cfg.model_path, schema_version=schema or nb_cfg.schema_version)
+        return NimbleStrategy(nb_cfg, max_leverage=cfg.risk.max_leverage, decision_hours=cfg.risk.decision_hours)
     if name.startswith("jev"):
         jev_cfg = cfg.jev
         if ":" in name:
@@ -33,7 +40,7 @@ def make_strategy(name: str, cfg: Config) -> Strategy:
             llm_cfg = replace(llm_cfg, model=model or llm_cfg.model, prompt_version=version or llm_cfg.prompt_version)
         return LLMStrategy(llm_cfg, max_leverage=cfg.risk.max_leverage, decision_hours=cfg.risk.decision_hours)
     if name not in BASELINES:
-        raise KeyError(f"unknown strategy {name!r}; choose from jev, llm, {', '.join(BASELINES)}")
+        raise KeyError(f"unknown strategy {name!r}; choose from nimble, jev, llm, {', '.join(BASELINES)}")
     return BASELINES[name]()
 
 
@@ -63,7 +70,7 @@ class Workbench:
         out = {}
         for s in self.symbols:
             out[s] = strategy.decide(s, self.stores[s], self.decision_times(s, start, end))
-        if isinstance(strategy, (LLMStrategy, JevStrategy)):
+        if isinstance(strategy, (LLMStrategy, JevStrategy, NimbleStrategy)):
             log.info("%s stats: %s", strategy.name, strategy.stats)
         return out
 
