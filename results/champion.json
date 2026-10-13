@@ -1,0 +1,73 @@
+{
+  "strategy": "donchian_breakout",
+  "spec": "donchian_breakout",
+  "period": [
+    "2026-07-13",
+    "2026-10-11"
+  ],
+  "symbols": [
+    "BTCUSDT",
+    "ETHUSDT",
+    "XRPUSDT",
+    "BNBUSDT"
+  ],
+  "risk": {
+    "decision_hours": 24,
+    "max_leverage": 10,
+    "default_leverage": 3,
+    "sizing": "margin",
+    "margin_per_trade": 0.08,
+    "risk_per_trade": 0.01,
+    "sl_source": "atr",
+    "atr_sl_mult": 3.0,
+    "reward_risk": 3.0,
+    "min_sl_pct": 0.004,
+    "max_sl_pct": 0.08,
+    "min_confidence": 0.65,
+    "flat_closes": true,
+    "max_open_positions": 10
+  },
+  "seed": 7,
+  "metrics": {
+    "total_return": 0.06414607613554368,
+    "sharpe": 0.912317501041125,
+    "max_drawdown": -0.18704492158286434,
+    "trades": 17,
+    "win_rate": 0.35294117647058826,
+    "avg_leverage": 3.0,
+    "directional_accuracy": 0.5335463258785943
+  },
+  "buy_and_hold_return": 0.09825349851477894,
+  "timing_permutation": {
+    "observed": 0.06414607613554368,
+    "null_mean": 0.18615014752037584,
+    "null_p05": 0.07266840583215795,
+    "null_p95": 0.3121985282351412,
+    "p_value": 0.9568106312292359
+  },
+  "trade_bootstrap": {
+    "n_trades": 17,
+    "return_p05": -0.12959876098472292,
+    "return_p50": 0.06300557877620379,
+    "return_p95": 0.2854933740748858,
+    "prob_positive": 0.694
+  },
+  "random_windows": {
+    "n": 80,
+    "window_days": 30,
+    "coins_per_window": 2,
+    "beat_buy_hold_share": 0.725,
+    "excess_median": 0.027807699602875102,
+    "excess_p10": -0.04680594903944668,
+    "excess_p90": 0.08164684914195754
+  },
+  "risk_perturbation": {
+    "n": 40,
+    "return_median": 0.013415783442063622,
+    "return_p10": 0.0,
+    "return_p90": 0.06385800002573674,
+    "positive_share": 0.775
+  },
+  "robust_score": 0.013903849801437551,
+  "crowned": "2026-10-13T12:04:48.836220+00:00"
+}

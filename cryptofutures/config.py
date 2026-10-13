@@ -66,6 +66,7 @@ class LLMConfig:
     prompt_version: str = "v2"
     reasoning_effort: str = "low"      # for reasoning models that honour it (gpt-oss)
     cache_path: str = "data/llm_cache.sqlite"
+    cache_only: bool = False           # never call the model: cached answers only, misses become FLAT
 
 
 @dataclass

@@ -142,6 +142,9 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
+- **90 days, top-3 hosted models, 4 coins:** Qwen3.6-27B +7.4% (buy-and-hold +9.8%), gpt-oss-120b +0.4%, DeepSeek −10.2%.
+  Qwen's timing beat 90% of random shuffles with tuned risk settings (p = 0.096): the best lead so far, not yet proof.
+  See `results/sample/top3-90d/`.
 - **Hosted vs local, 10 coins, 26 Sep → 11 Oct:** Qwen3.6-27B (OpenRouter) −3.8%, buy-and-hold −5.0%,
   gpt-oss-120b −7.7%, DeepSeek V4 Flash −7.9%, Bespoke-Nimble-9B −10.2%, Jev-Style 2B −27.6%. No model's direction
   accuracy beat always-LONG, and all of them rarely short. The whole hosted run cost about $1.16 on OpenRouter.
@@ -156,6 +159,27 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 So far no small model shows an edge. The harness is there to find out whether bigger models
 (JEV-9B/27B, gpt-oss-20b, Qwen3-32B on a GPU) do. See `results/sample/README.md` for details.
 
+## Randomized robustness tests and the champion
+
+A single backtest is one path. `robustness` re-runs a strategy's cached decisions many times to separate skill from luck:
+
+```bash
+cryptofutures robustness --cache-only --strategies "llm:qwen/qwen3.6-27b,donchian_breakout,buy_and_hold" \
+  --start 2026-07-13 --end 2026-10-11 --permutations 300 --windows 80 --risk-draws 40
+```
+
+| Test | Question it answers |
+|---|---|
+| Timing permutation | Shuffle each coin's calls in time, keeping the mix of LONG/SHORT/FLAT, confidence and stops. Does the real order beat the shuffles? (p-value) |
+| Trade bootstrap | Resample the trades: 5–95% range of the total return |
+| Random windows × coin subsets | How often does it beat buy-and-hold on the same random 30-day window and coins? |
+| Risk perturbation | Does the result survive random risk settings, or only one exact setup? |
+
+Each run is scored by the median excess return over buy-and-hold in the random windows, halved when the timing
+isn't significant (p > 0.10). The best score so far is kept in `results/champion.json`, so a new model, prompt
+or risk setting only takes over by beating it on the same tests. `--cache-only` makes any command use stored
+model answers only: free, offline, and no accidental API spend.
+
 ## Layout
 
 ```
@@ -168,6 +192,7 @@ cryptofutures/
   metrics.py     performance + directional accuracy
   benchmark.py   multi-strategy leaderboard + history
   optimize.py    walk-forward risk-parameter tuning
+  robustness.py  randomized skill-vs-luck tests + champion tracking
   live.py        real-time paper trader (state persisted in results/live_state.json)
   cli.py         command line
 scripts/         serve_local.sh - download GGUFs once and serve them on 127.0.0.1

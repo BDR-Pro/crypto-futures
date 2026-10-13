@@ -66,6 +66,26 @@ SYSTEM_PROMPTS = {
         '"stop_loss_pct": number (percent, e.g. 2.5), "take_profit_pct": number (percent), '
         '"reason": "max 25 words"}}'
     ),
+    "v3": (
+        "You are a disciplined quantitative crypto futures trader managing one USDT-margined perpetual. "
+        "Every {tf}h you decide the position to hold until the next decision: LONG, SHORT or FLAT.\n"
+        "Method - do this silently before answering:\n"
+        "a) Build the bull case and the bear case from the data with equal care. SHORT is as normal as LONG: "
+        "perpetuals profit from falling prices exactly like rising ones.\n"
+        "b) Regime: price below the daily EMA50 with negative 7d/30d returns is a downtrend - prefer SHORT or FLAT, "
+        "not LONG. Price above the daily EMA50 with positive returns is an uptrend - prefer LONG or FLAT. "
+        "Low ADX with price near the EMAs is a range - FLAT unless RSI is extreme.\n"
+        "c) Do not buy just because price recently rose, nor sell just because it fell; "
+        "weigh trend, momentum, flow and funding together.\n"
+        "d) Pick the side whose case is clearly stronger; FLAT when neither is.\n"
+        "Risk: stop-loss 1.0-2.5x ATR%; take-profit at least 1.5x the stop; leverage 1-{max_lev}, inversely "
+        "proportional to volatility, with leverage x stop_loss_pct <= 15. confidence is your calibrated "
+        "probability (0-1) that the trade reaches take-profit before stop-loss; below 0.55 means FLAT.\n"
+        "Reply with a single JSON object and nothing else: "
+        '{{"action": "LONG|SHORT|FLAT", "confidence": number, "leverage": integer, '
+        '"stop_loss_pct": number (percent, e.g. 2.5), "take_profit_pct": number (percent), '
+        '"reason": "max 25 words: the decisive bull or bear argument"}}'
+    ),
 }
 
 
@@ -129,7 +149,9 @@ def parse_response(text: str) -> Decision:
 class DecisionCache:
     def __init__(self, path: str | Path):
         Path(path).parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(path), check_same_thread=False)
+        # Several benchmark processes may share one cache: wait for locks, use WAL for concurrent readers.
+        self.conn = sqlite3.connect(str(path), check_same_thread=False, timeout=60)
+        self.conn.execute("PRAGMA journal_mode=WAL")
         self.lock = threading.Lock()
         self.conn.execute("CREATE TABLE IF NOT EXISTS decisions (key TEXT PRIMARY KEY, model TEXT, "
                           "prompt_version TEXT, symbol TEXT, time TEXT, raw TEXT, created REAL)")
@@ -153,6 +175,9 @@ class LLMClient:
     def __init__(self, cfg: LLMConfig):
         self.cfg = cfg
         self.session = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_connections=4, pool_maxsize=max(10, cfg.concurrency))
+        self.session.mount("https://", adapter)
+        self.session.mount("http://", adapter)
         self._format_mode = "json_schema"
 
     def is_openrouter(self) -> bool:
@@ -189,12 +214,27 @@ class LLMClient:
             p["response_format"] = {"type": "json_object", "schema": RESPONSE_SCHEMA}
         return p
 
+    def _post(self, url: str, payload: dict, headers: dict, attempts: int = 6) -> requests.Response:
+        """POST with exponential backoff on rate limits, gateway errors and dropped connections."""
+        for attempt in range(attempts):
+            try:
+                resp = self.session.post(url, json=payload, headers=headers, timeout=self.cfg.timeout)
+                if resp.status_code not in (429, 502, 503, 504) or attempt == attempts - 1:
+                    return resp
+                wait = float(resp.headers.get("Retry-After") or 0) or min(60.0, 2.0 ** (attempt + 1))
+            except (requests.ConnectionError, requests.Timeout):
+                if attempt == attempts - 1:
+                    raise
+                wait = min(60.0, 2.0 ** (attempt + 1))
+            _time.sleep(wait)
+        raise RuntimeError("unreachable")
+
     def chat(self, messages: list[dict]) -> str:
         url = self.cfg.base_url.rstrip("/") + "/chat/completions"
         headers = {"Authorization": f"Bearer {self.api_key()}"}
         modes = ["json_schema", "json_object", "none"]
         for mode in modes[modes.index(self._format_mode):]:
-            resp = self.session.post(url, json=self._payload(messages, mode), headers=headers, timeout=self.cfg.timeout)
+            resp = self._post(url, self._payload(messages, mode), headers)
             # Servers disagree on structured-output support and on how they reject it
             # (Ollama/vLLM: json_schema, llama-cpp-python: json_object, some answer 500).
             if resp.status_code in (400, 422, 500) and mode != "none" and "response_format" in resp.text:
@@ -260,7 +300,8 @@ class LLMStrategy(SnapshotModelStrategy):
         self.max_leverage = max_leverage
         self.decision_hours = decision_hours
         self.client = LLMClient(cfg)
-        self.client.check_auth()
+        if not cfg.cache_only:
+            self.client.check_auth()
         self.cache = DecisionCache(cfg.cache_path)
         self.name = f"llm[{cfg.model}|{cfg.prompt_version}]"
 
@@ -277,6 +318,9 @@ class LLMStrategy(SnapshotModelStrategy):
         raw = self.cache.get(key)
         if raw is not None:
             self.stats["cached"] += 1
+        elif self.cfg.cache_only:
+            self.stats["missing"] = self.stats.get("missing", 0) + 1
+            return Decision(FLAT, 0.0, reason="not in cache (cache-only run)")
         else:
             raw = self.client.chat([{"role": "system", "content": system}, {"role": "user", "content": user}])
             parse_response(raw)  # validate before caching

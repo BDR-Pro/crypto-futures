@@ -17,6 +17,7 @@ def _overrides(a: argparse.Namespace) -> dict:
         o.setdefault("data", {})["symbols"] = [s.strip().upper() for s in a.symbols.split(",")]
     for key, section, field in [("model", "llm", "model"), ("prompt", "llm", "prompt_version"),
                                 ("base_url", "llm", "base_url"), ("concurrency", "llm", "concurrency"),
+                                ("cache_only", "llm", "cache_only"),
                                 ("jev_url", "jev", "base_url"), ("jev_model", "jev", "model"),
                                 ("decision_hours", "risk", "decision_hours"), ("max_leverage", "risk", "max_leverage"),
                                 ("exchange", "live", "exchange")]:
@@ -38,6 +39,8 @@ def main(argv: list[str] | None = None) -> None:
         sp.add_argument("--prompt", help="prompt version (v1, v2)")
         sp.add_argument("--base-url", help="OpenAI-compatible endpoint, e.g. http://localhost:11434/v1")
         sp.add_argument("--concurrency", type=int)
+        sp.add_argument("--cache-only", action="store_true", default=None,
+                        help="use cached LLM answers only; never call the model (misses become FLAT)")
         sp.add_argument("--jev-url", help="Jev-style decision model endpoint, e.g. http://127.0.0.1:8081/v1")
         sp.add_argument("--jev-model", help="model name on the Jev-style server")
         sp.add_argument("--decision-hours", type=int)
@@ -68,6 +71,16 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--folds", type=int, default=4)
     sp.add_argument("--trials", type=int, default=60)
     sp.add_argument("--objective", default="sharpe", choices=["sharpe", "sortino", "calmar", "total_return", "return_dd"])
+
+    sp = sub.add_parser("robustness", help="randomized skill-vs-luck tests; keeps the best result as champion")
+    common(sp)
+    sp.add_argument("--strategies", default="nimble,buy_and_hold,ema_trend")
+    sp.add_argument("--permutations", type=int, default=200, help="timing shuffles per strategy")
+    sp.add_argument("--windows", type=int, default=60, help="random sub-windows x coin subsets")
+    sp.add_argument("--window-days", type=int, default=30)
+    sp.add_argument("--risk-draws", type=int, default=30, help="random risk settings to try")
+    sp.add_argument("--seed", type=int, default=0)
+    sp.add_argument("--tag", default="")
 
     sp = sub.add_parser("history", help="show every benchmark run so far, best first")
     sp.add_argument("--rank-by", default="sharpe")
@@ -119,6 +132,27 @@ def main(argv: list[str] | None = None) -> None:
             print("Tuning did NOT beat the current settings on unseen data (it overfit) - keep your current [risk].")
         print("Recommended [risk] settings (also in results/best_risk_*.toml):")
         print(json.dumps(rep["recommended"], indent=2))
+
+    elif a.cmd == "robustness":
+        from datetime import datetime, timezone
+        from pathlib import Path
+
+        from .robustness import RobustnessSuite, format_report, update_champion
+        suite = RobustnessSuite(cfg, a.start, a.end, seed=a.seed)
+        reports = [suite.evaluate(spec.strip(), n_perm=a.permutations, n_windows=a.windows,
+                                  window_days=a.window_days, n_risk=a.risk_draws)
+                   for spec in a.strategies.split(",")]
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        out = Path("results") / f"robustness_{stamp}{'_' + a.tag if a.tag else ''}"
+        out.mkdir(parents=True, exist_ok=True)
+        table = format_report(reports)
+        (out / "report.json").write_text(json.dumps(reports, indent=2, default=float))
+        (out / "report.md").write_text(f"# Robustness {a.start} -> {a.end}\n\n{table}\n")
+        champ, promoted = update_champion(reports)
+        print(table)
+        print(f"\nchampion: {champ['strategy']} (robust score {champ['robust_score']*100:+.2f})"
+              + (" - NEW" if promoted else " - unchanged"))
+        print(f"results: {out}/")
 
     elif a.cmd == "history":
         from .benchmark import format_table, load_history

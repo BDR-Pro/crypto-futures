@@ -1,0 +1,15 @@
+[risk]
+decision_hours = 24
+max_leverage = 10
+default_leverage = 3
+sizing = "margin"
+margin_per_trade = 0.08
+risk_per_trade = 0.01
+sl_source = "atr"
+atr_sl_mult = 3.0
+reward_risk = 3.0
+min_sl_pct = 0.004
+max_sl_pct = 0.08
+min_confidence = 0.65
+flat_closes = true
+max_open_positions = 10

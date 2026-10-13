@@ -196,3 +196,73 @@ def test_openrouter_key_only_sent_to_openrouter(monkeypatch):
     assert LLMClient(LLMConfig(base_url="https://openrouter.ai.evil.com/v1")).api_key() == "local"
     monkeypatch.delenv("OPENROUTER_API_KEY")   # network-secret setup: proxy swaps the placeholder
     assert LLMClient(LLMConfig(base_url="https://openrouter.ai/api/v1")).api_key() == "proxy-injected"
+
+
+def test_shuffle_keeps_decision_mix_but_changes_timing():
+    from cryptofutures.robustness import shuffle_decisions
+    idx = pd.date_range("2025-01-01", periods=50, freq="D", tz="UTC")
+    d = pd.DataFrame({"action": ["LONG"] * 30 + ["SHORT"] * 15 + ["FLAT"] * 5,
+                      "confidence": np.linspace(0.5, 1, 50)}, index=idx)
+    s = shuffle_decisions({"X": d}, np.random.default_rng(1))["X"]
+    assert (s.index == d.index).all()
+    assert s.action.value_counts().to_dict() == d.action.value_counts().to_dict()
+    assert sorted(s.confidence) == sorted(d.confidence)
+    assert not (s.action == d.action).all()
+
+
+def test_bootstrap_trades_bounds():
+    from cryptofutures.robustness import bootstrap_trades
+    t = pd.DataFrame({"pnl": [100.0] * 20})
+    b = bootstrap_trades(t, 10_000)
+    assert b["return_p05"] == pytest.approx(0.2) and b["prob_positive"] == 1.0
+    mixed = bootstrap_trades(pd.DataFrame({"pnl": [100.0, -100.0] * 20}), 10_000)
+    assert mixed["return_p05"] < 0 < mixed["return_p95"]
+    assert bootstrap_trades(pd.DataFrame(columns=["pnl"]), 10_000) == {"n_trades": 0}
+
+
+def test_robust_score_and_champion(tmp_path):
+    from cryptofutures.robustness import robust_score, update_champion
+    windows = {"excess_median": 0.04}
+    assert robust_score({"p_value": 0.05}, windows) == pytest.approx(0.04)
+    assert robust_score({"p_value": 0.5}, windows) == pytest.approx(0.02)      # not significant: halved
+    assert robust_score({"p_value": 0.5}, {"excess_median": -0.03}) == pytest.approx(-0.03)
+    path = tmp_path / "champion.json"
+    champ, promoted = update_champion([{"strategy": "a", "robust_score": 0.01}], path)
+    assert promoted and champ["strategy"] == "a"
+    champ, promoted = update_champion([{"strategy": "b", "robust_score": -0.02}], path)
+    assert not promoted and champ["strategy"] == "a"
+    champ, promoted = update_champion([{"strategy": "c", "robust_score": 0.03}], path)
+    assert promoted and champ["strategy"] == "c"
+
+
+def test_robustness_suite_end_to_end(tmp_path):
+    """Synthetic market: every randomized test runs end to end and returns sane numbers."""
+    from cryptofutures.config import DataConfig
+    from cryptofutures.robustness import RobustnessSuite
+    from cryptofutures.data import MarketData
+    rng = np.random.default_rng(3)
+    for sym in ("AAAUSDT", "BBBUSDT"):
+        prices = 100 * np.exp(np.cumsum(rng.normal(0, 0.01, 24 * 300)))
+        c = candles(list(prices), start="2025-01-01", spread=0.002)
+        MarketData(tmp_path)._write(c, MarketData(tmp_path)._path(sym, "1h"))
+    cfg = Config(data=DataConfig(symbols=["AAAUSDT", "BBBUSDT"], data_dir=str(tmp_path)),
+                 exchange=ExchangeConfig(use_funding=False))
+    cfg = with_risk(cfg, decision_hours=24, min_confidence=0.0)
+    suite = RobustnessSuite(cfg, "2025-08-01", "2025-10-20", seed=1)
+    r = suite.evaluate("random", n_perm=10, n_windows=5, window_days=20, n_risk=3)
+    assert 0 < r["timing_permutation"]["p_value"] <= 1
+    assert r["random_windows"]["n"] == 5 and r["risk_perturbation"]["n"] == 3
+    assert r["robust_score"] == r["robust_score"]       # finite / not NaN
+
+
+def test_cache_only_never_calls_model(tmp_path):
+    from cryptofutures.config import LLMConfig
+    from cryptofutures.strategies.llm import LLMStrategy
+    st = LLMStrategy(LLMConfig(base_url="http://127.0.0.1:9/v1", cache_only=True,
+                               cache_path=str(tmp_path / "c.sqlite")))
+    st.client.chat = lambda *_: (_ for _ in ()).throw(AssertionError("model was called"))
+    c = candles([100.0] * (24 * 300), spread=0.002)
+    from cryptofutures.features import FeatureStore
+    store = FeatureStore(c, 24)
+    d = st.decide("X", store, store.decision_times()[:3])
+    assert (d.action == "FLAT").all() and st.stats["missing"] == 3

@@ -8,3 +8,4 @@ results/*
 !results/sample/
 *.gguf
 models/
+!results/champion.json
