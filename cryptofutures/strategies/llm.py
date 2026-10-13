@@ -9,12 +9,14 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import re
 import sqlite3
 import threading
 import time as _time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+from urllib.parse import urlparse
 
 import pandas as pd
 import requests
@@ -153,6 +155,15 @@ class LLMClient:
         self.session = requests.Session()
         self._format_mode = "json_schema"
 
+    def api_key(self) -> str:
+        host = urlparse(self.cfg.base_url).hostname or ""
+        if host == "openrouter.ai" or host.endswith(".openrouter.ai"):
+            key = os.environ.get(self.cfg.api_key_env, "")
+            if not key:
+                raise RuntimeError(f"OpenRouter needs an API key: export {self.cfg.api_key_env}=sk-or-...")
+            return key
+        return self.cfg.api_key
+
     def _payload(self, messages, mode):
         p = {"model": self.cfg.model, "messages": messages, "temperature": self.cfg.temperature,
              "max_tokens": self.cfg.max_tokens, "seed": 42}
@@ -167,7 +178,7 @@ class LLMClient:
 
     def chat(self, messages: list[dict]) -> str:
         url = self.cfg.base_url.rstrip("/") + "/chat/completions"
-        headers = {"Authorization": f"Bearer {self.cfg.api_key}"}
+        headers = {"Authorization": f"Bearer {self.api_key()}"}
         modes = ["json_schema", "json_object", "none"]
         for mode in modes[modes.index(self._format_mode):]:
             resp = self.session.post(url, json=self._payload(messages, mode), headers=headers, timeout=self.cfg.timeout)
@@ -236,6 +247,7 @@ class LLMStrategy(SnapshotModelStrategy):
         self.max_leverage = max_leverage
         self.decision_hours = decision_hours
         self.client = LLMClient(cfg)
+        self.client.api_key()   # fail fast on a missing hosted-API key instead of trading on errors
         self.cache = DecisionCache(cfg.cache_path)
         self.name = f"llm[{cfg.model}|{cfg.prompt_version}]"
 

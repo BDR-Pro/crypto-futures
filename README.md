@@ -94,6 +94,21 @@ cryptofutures benchmark --strategies nimble,jev,llm:gpt-oss:20b,llm:qwen3:14b,em
   --start 2026-07-01 --end 2026-10-01 --tag model-shootout
 ```
 
+### Optional: hosted models through OpenRouter
+
+Everything above runs locally. To try models too big for your machine, point the `llm` strategy at
+[OpenRouter](https://openrouter.ai). The decision models (`nimble`, `jev`) stay local, because they need raw
+answer-token logits from their own weights.
+
+```bash
+export OPENROUTER_API_KEY=sk-or-...        # read from the environment, only ever sent to openrouter.ai
+cryptofutures benchmark --base-url https://openrouter.ai/api/v1 \
+  --strategies "llm:openai/gpt-oss-120b,llm:qwen/qwen3.6-27b,nimble,buy_and_hold" --start 2026-09-26 --end 2026-10-11
+```
+
+Answers are cached like local ones, so re-runs and optimizer sweeps cost nothing. TypeSafe's own
+`typesafe/jev-router` is also listed there; it routes to generative models, so it fits the `llm` strategy.
+
 Strategy specs: `llm:<model>@<prompt_version>` (for example `llm:qwen3:14b@v1`), `jev:<model>@<question_set>`
 and `nimble:<path to gguf>@<schema>`.
 

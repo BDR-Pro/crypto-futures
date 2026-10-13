@@ -128,9 +128,14 @@ class JevStrategy(SnapshotModelStrategy):
         self.max_leverage = max_leverage
         self.decision_hours = decision_hours
         self.questions = QUESTION_SETS[cfg.question_set]
-        self.client = InProcessJev(cfg) if cfg.backend == "local" else JevClient(cfg)
+        self._client: InProcessJev | JevClient | None = None   # loaded lazily: cached runs need no model
         self.cache = DecisionCache(cfg.cache_path)
         self.name = f"jev[{cfg.model}|{cfg.question_set}]"
+
+    def client(self) -> InProcessJev | JevClient:
+        if self._client is None:
+            self._client = InProcessJev(self.cfg) if self.cfg.backend == "local" else JevClient(self.cfg)
+        return self._client
 
     def ask(self, key: str, state: str, symbol: str, t: str) -> list[tuple[object, float]]:
         template, options = self.questions[key]
@@ -138,7 +143,7 @@ class JevStrategy(SnapshotModelStrategy):
         cache_key = hashlib.sha256(json.dumps(["jev", self.cfg.model, prompt]).encode()).hexdigest()
         raw = self.cache.get(cache_key)
         if raw is None:
-            raw = json.dumps(self.client.top_logprobs(prompt))
+            raw = json.dumps(self.client().top_logprobs(prompt))
             self.cache.put(cache_key, self.cfg.model, f"{self.cfg.question_set}:{key}", symbol, t, raw)
             self.stats["queried"] += 1
         else:

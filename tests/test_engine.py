@@ -185,3 +185,15 @@ def test_nimble_prompt_matches_bespoke_format():
     assert [c["value"] for c in pos["choices"]] == ["LONG", "SHORT", "FLAT"]
     p = softmax([2.0, 1.0, 0.0], 1.0)
     assert sum(p) == pytest.approx(1.0) and p[0] > p[1] > p[2]
+
+
+def test_openrouter_key_only_sent_to_openrouter(monkeypatch):
+    from cryptofutures.config import LLMConfig
+    from cryptofutures.strategies.llm import LLMClient
+    monkeypatch.setenv("OPENROUTER_API_KEY", "sk-or-test")
+    assert LLMClient(LLMConfig(base_url="https://openrouter.ai/api/v1")).api_key() == "sk-or-test"
+    assert LLMClient(LLMConfig(base_url="http://127.0.0.1:8080/v1")).api_key() == "local"
+    assert LLMClient(LLMConfig(base_url="https://openrouter.ai.evil.com/v1")).api_key() == "local"
+    monkeypatch.delenv("OPENROUTER_API_KEY")
+    with pytest.raises(RuntimeError):
+        LLMClient(LLMConfig(base_url="https://openrouter.ai/api/v1")).api_key()

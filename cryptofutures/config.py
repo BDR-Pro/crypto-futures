@@ -56,6 +56,9 @@ class LLMConfig:
     base_url: str = "http://localhost:11434/v1"
     model: str = "gpt-oss:20b"
     api_key: str = "local"
+    # Optional hosted fallback: with base_url = "https://openrouter.ai/api/v1" the key is read from this
+    # env var (it is only ever sent to openrouter.ai) and model is an OpenRouter id, e.g. "openai/gpt-oss-120b".
+    api_key_env: str = "OPENROUTER_API_KEY"
     temperature: float = 0.0
     max_tokens: int = 600
     timeout: float = 180.0

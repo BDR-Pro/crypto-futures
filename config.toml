@@ -61,6 +61,8 @@ cache_path = "data/llm_cache.sqlite"
 # Generative LLM writing a JSON decision. Strategy name: "llm".
 # Local llama.cpp from scripts/serve_local.sh; for Ollama use base_url = "http://localhost:11434/v1"
 # and a tag such as model = "gpt-oss:20b" or "qwen3:8b".
+# Hosted option: base_url = "https://openrouter.ai/api/v1", model = "openai/gpt-oss-120b",
+# key from the OPENROUTER_API_KEY environment variable (never stored in this file).
 base_url = "http://127.0.0.1:8080/v1"
 model = "local-llm"
 temperature = 0.0
