@@ -1,0 +1,253 @@
+{
+  "strategy": "ema_trend",
+  "objective": "sharpe",
+  "folds": [
+    {
+      "train": [
+        "2024-09-01 00:00:00+00:00",
+        "2025-03-12 12:00:00+00:00"
+      ],
+      "test": [
+        "2025-03-12 12:00:00+00:00",
+        "2025-09-21 00:00:00+00:00"
+      ],
+      "best_params": {
+        "sl_source": "atr",
+        "atr_sl_mult": 1.5,
+        "reward_risk": 100.0,
+        "max_leverage": 1,
+        "min_confidence": 0.0,
+        "margin_per_trade": 0.08,
+        "flat_closes": true
+      },
+      "train_score": 1.7630245816062613,
+      "test_tuned": {
+        "final_equity": 9071.12,
+        "total_return": -0.09288848059968147,
+        "cagr": -0.16880509202685545,
+        "sharpe": -0.4887988562109263,
+        "sortino": -0.6363155905103972,
+        "max_drawdown": -0.22239925178515174,
+        "calmar": -0.7590182551060433,
+        "volatility": 0.2920443638986571,
+        "trades": 100,
+        "win_rate": 0.27,
+        "profit_factor": 0.7178713886812732,
+        "avg_trade_pnl": -9.28884805996804,
+        "expectancy_on_margin": -0.010620207191321816,
+        "avg_leverage": 1.0,
+        "avg_hold_hours": 244.32,
+        "long_share": 0.45,
+        "liquidations": 0,
+        "stop_losses": 47,
+        "take_profits": 0,
+        "fees_paid": 73.10300273517221,
+        "funding_paid": 76.64924108067437,
+        "directional_calls": 1038,
+        "directional_accuracy": 0.49614643545279385,
+        "accuracy_high_conf": 0.49614643545279385
+      },
+      "test_default": {
+        "final_equity": 8782.1,
+        "total_return": -0.12179028297343175,
+        "cagr": -0.21831235723922215,
+        "sharpe": -0.7738869353014907,
+        "sortino": -1.0087959051846636,
+        "max_drawdown": -0.2371344321024702,
+        "calmar": -0.9206269848862999,
+        "volatility": 0.27141169686860595,
+        "trades": 171,
+        "win_rate": 0.3216374269005848,
+        "profit_factor": 0.7591934088158376,
+        "avg_trade_pnl": -7.1222387703761365,
+        "expectancy_on_margin": -0.008446555150825685,
+        "avg_leverage": 1.0,
+        "avg_hold_hours": 137.93567251461988,
+        "long_share": 0.631578947368421,
+        "liquidations": 0,
+        "stop_losses": 81,
+        "take_profits": 38,
+        "fees_paid": 120.83538094225008,
+        "funding_paid": 61.770747777693515,
+        "directional_calls": 1038,
+        "directional_accuracy": 0.49614643545279385,
+        "accuracy_high_conf": 0.49614643545279385
+      }
+    },
+    {
+      "train": [
+        "2024-09-01 00:00:00+00:00",
+        "2025-09-21 00:00:00+00:00"
+      ],
+      "test": [
+        "2025-09-21 00:00:00+00:00",
+        "2026-04-01 12:00:00+00:00"
+      ],
+      "best_params": {
+        "sl_source": "atr",
+        "atr_sl_mult": 1.5,
+        "reward_risk": 100.0,
+        "max_leverage": 1,
+        "min_confidence": 0.0,
+        "margin_per_trade": 0.08,
+        "flat_closes": true
+      },
+      "train_score": 0.9103810442915417,
+      "test_tuned": {
+        "final_equity": 12891.01,
+        "total_return": 0.28910122302466523,
+        "cagr": 0.6186797068607828,
+        "sharpe": 1.8811633511288786,
+        "sortino": 2.809784839071297,
+        "max_drawdown": -0.08402975498376986,
+        "calmar": 7.362626571745678,
+        "volatility": 0.28232341268398636,
+        "trades": 74,
+        "win_rate": 0.40540540540540543,
+        "profit_factor": 2.7581168212769303,
+        "avg_trade_pnl": 39.06773284117075,
+        "expectancy_on_margin": 0.046847045882607685,
+        "avg_leverage": 1.0,
+        "avg_hold_hours": 484.3378378378378,
+        "long_share": 0.47297297297297297,
+        "liquidations": 0,
+        "stop_losses": 24,
+        "take_profits": 0,
+        "fees_paid": 59.39924982034574,
+        "funding_paid": -9.062817697456557,
+        "directional_calls": 1505,
+        "directional_accuracy": 0.5627906976744186,
+        "accuracy_high_conf": 0.5627906976744186
+      },
+      "test_default": {
+        "final_equity": 12855.8,
+        "total_return": 0.2855798125538118,
+        "cagr": 0.6103041338365331,
+        "sharpe": 1.5592981232252714,
+        "sortino": 2.093019215904053,
+        "max_drawdown": -0.12417631874382062,
+        "calmar": 4.914819025160574,
+        "volatility": 0.35154523689593786,
+        "trades": 173,
+        "win_rate": 0.4508670520231214,
+        "profit_factor": 1.5328072171396092,
+        "avg_trade_pnl": 16.50750361582721,
+        "expectancy_on_margin": 0.020240734274325597,
+        "avg_leverage": 1.0,
+        "avg_hold_hours": 200.57803468208093,
+        "long_share": 0.2543352601156069,
+        "liquidations": 0,
+        "stop_losses": 72,
+        "take_profits": 53,
+        "fees_paid": 152.6125844711542,
+        "funding_paid": -7.7065933107837665,
+        "directional_calls": 1505,
+        "directional_accuracy": 0.5627906976744186,
+        "accuracy_high_conf": 0.5627906976744186
+      }
+    },
+    {
+      "train": [
+        "2024-09-01 00:00:00+00:00",
+        "2026-04-01 12:00:00+00:00"
+      ],
+      "test": [
+        "2026-04-01 12:00:00+00:00",
+        "2026-10-11 00:00:00+00:00"
+      ],
+      "best_params": {
+        "sl_source": "atr",
+        "atr_sl_mult": 1.5,
+        "reward_risk": 100.0,
+        "max_leverage": 1,
+        "min_confidence": 0.0,
+        "margin_per_trade": 0.08,
+        "flat_closes": true
+      },
+      "train_score": 1.182225465446852,
+      "test_tuned": {
+        "final_equity": 10700.44,
+        "total_return": 0.07004429149297975,
+        "cagr": 0.13700101043583746,
+        "sharpe": 0.7568623098414105,
+        "sortino": 0.9000504267149873,
+        "max_drawdown": -0.10150556281642276,
+        "calmar": 1.3496896784229429,
+        "volatility": 0.1951118120455407,
+        "trades": 48,
+        "win_rate": 0.4166666666666667,
+        "profit_factor": 1.6935614824872096,
+        "avg_trade_pnl": 14.59256072770414,
+        "expectancy_on_margin": 0.01893452752875347,
+        "avg_leverage": 1.0,
+        "avg_hold_hours": 439.9375,
+        "long_share": 0.5208333333333334,
+        "liquidations": 0,
+        "stop_losses": 15,
+        "take_profits": 0,
+        "fees_paid": 40.73154971877426,
+        "funding_paid": 10.050296926110313,
+        "directional_calls": 888,
+        "directional_accuracy": 0.536036036036036,
+        "accuracy_high_conf": 0.536036036036036
+      },
+      "test_default": {
+        "final_equity": 10774.51,
+        "total_return": 0.07745136349555826,
+        "cagr": 0.15197394703286626,
+        "sharpe": 0.7986219851340253,
+        "sortino": 0.9489923703766295,
+        "max_drawdown": -0.09802553174077111,
+        "calmar": 1.5503506518563137,
+        "volatility": 0.20341594516754583,
+        "trades": 126,
+        "win_rate": 0.4365079365079365,
+        "profit_factor": 1.2213674000786592,
+        "avg_trade_pnl": 6.146933610758593,
+        "expectancy_on_margin": 0.008536975141552224,
+        "avg_leverage": 1.0,
+        "avg_hold_hours": 159.9126984126984,
+        "long_share": 0.5079365079365079,
+        "liquidations": 0,
+        "stop_losses": 55,
+        "take_profits": 38,
+        "fees_paid": 108.45313475976242,
+        "funding_paid": 5.0771484493280505,
+        "directional_calls": 888,
+        "directional_accuracy": 0.536036036036036,
+        "accuracy_high_conf": 0.536036036036036
+      }
+    }
+  ],
+  "oos_summary": {
+    "tuned": {
+      "compounded_return": 0.2512654615510761,
+      "mean_sharpe": 0.7164089349197876,
+      "worst_drawdown": -0.22239925178515174
+    },
+    "default": {
+      "compounded_return": 0.21645194532544831,
+      "mean_sharpe": 0.5280110576859354,
+      "worst_drawdown": -0.2371344321024702
+    }
+  },
+  "tuning_helps_out_of_sample": true,
+  "recommended": {
+    "decision_hours": 24,
+    "max_leverage": 1,
+    "default_leverage": 3,
+    "sizing": "margin",
+    "margin_per_trade": 0.08,
+    "risk_per_trade": 0.01,
+    "sl_source": "atr",
+    "atr_sl_mult": 1.5,
+    "reward_risk": 100.0,
+    "min_sl_pct": 0.004,
+    "max_sl_pct": 0.08,
+    "min_confidence": 0.0,
+    "flat_closes": true,
+    "max_open_positions": 10,
+    "leverage_override": 1,
+    "liq_guard": "reduce_leverage"
+  }
+}
