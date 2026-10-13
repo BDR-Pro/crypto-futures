@@ -142,9 +142,9 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
-- **90 days, top-3 hosted models, 4 coins:** Qwen3.6-27B +7.4% (buy-and-hold +9.8%), gpt-oss-120b +0.4%, DeepSeek −10.2%.
-  Qwen's timing beat 90% of random shuffles with tuned risk settings (p = 0.096): the best lead so far, not yet proof.
-  See `results/sample/top3-90d/`.
+- **90 days, top-3 hosted models, all 10 coins:** buy-and-hold +28.5%, Qwen3.6-27B +5.0% (the only model in profit),
+  gpt-oss-120b −3.0%, DeepSeek −11.2%. Randomized tests: no model's timing is significant on 10 coins
+  (Qwen p = 0.64), and the models sat out ~70% of the rally. See `results/sample/top3-90d/`.
 - **Hosted vs local, 10 coins, 26 Sep → 11 Oct:** Qwen3.6-27B (OpenRouter) −3.8%, buy-and-hold −5.0%,
   gpt-oss-120b −7.7%, DeepSeek V4 Flash −7.9%, Bespoke-Nimble-9B −10.2%, Jev-Style 2B −27.6%. No model's direction
   accuracy beat always-LONG, and all of them rarely short. The whole hosted run cost about $1.16 on OpenRouter.
@@ -176,8 +176,8 @@ cryptofutures robustness --cache-only --strategies "llm:qwen/qwen3.6-27b,donchia
 | Risk perturbation | Does the result survive random risk settings, or only one exact setup? |
 
 Each run is scored by the median excess return over buy-and-hold in the random windows, halved when the timing
-isn't significant (p > 0.10). The best score so far is kept in `results/champion.json`, so a new model, prompt
-or risk setting only takes over by beating it on the same tests. `--cache-only` makes any command use stored
+isn't significant (p > 0.10). The best score so far is kept in `results/champion.json`, one champion per test setup
+(period + coins + decision interval), so a new model, prompt or risk setting only takes over by beating it on the same tests. `--cache-only` makes any command use stored
 model answers only: free, offline, and no accidental API spend.
 
 ## Layout

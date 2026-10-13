@@ -1,8 +1,28 @@
 # Top-3 hosted models, 90 days (13 Jul → 11 Oct 2026), daily decisions
 
-Models via OpenRouter, prompt v2, all answers cached. The OpenRouter account ran out of credit mid-run
-(HTTP 402), so the analysis uses the 4 coins every model fully covered: BTC, ETH, XRP, BNB.
-The remaining 6 coins need about $5 more credit to complete; cached answers are never paid for twice.
+Models via OpenRouter, prompt v2, all answers cached: 900 decisions per model (DeepSeek 895; 5 malformed
+answers count as FLAT). About $6.50 of OpenRouter credit in total.
+
+## All 10 coins: `leaderboard_10coins.md`, `robustness_10coins_*.md`
+
+| strategy | return | Sharpe | max DD | trades | profit factor | timing p-value | beats B&H in random windows |
+|---|---|---|---|---|---|---|---|
+| buy_and_hold | **+28.5%** | 2.90 | −10.4% | 10 | – | – | – |
+| **Qwen3.6-27B** | +5.0% | 0.85 | −8.2% | 97 | 1.19 | 0.64 | 25% |
+| Qwen3.6-27B, tuned risk | +6.9% | – | – | – | – | 0.19 | 12% |
+| donchian_breakout | −1.6% | 0.32 | −37.9% | 95 | 0.98 | 0.97 | 32% |
+| gpt-oss-120b | −3.0% | −0.43 | −11.5% | 101 | 0.89 | 0.93 | 2% |
+| DeepSeek V4 Flash | −11.2% | −1.75 | −12.7% | 93 | 0.63 | 1.00 | 4% |
+| random | −29.9% | −3.51 | −32.7% | 463 | 0.78 | – | – |
+
+- The models sat FLAT about 70% of the time (Qwen 646 FLAT / 220 LONG / 34 SHORT) and missed most of a strong rally.
+- Qwen stays the best model and the only one in profit, but its timing signal from the 4-coin subset did not hold
+  across 10 coins (p = 0.64 default, 0.19 tuned). No model shows statistically meaningful timing skill yet.
+- Champion for this setup (`results/champion.json`): buy_and_hold.
+
+## First pass: 4 coins (BTC, ETH, XRP, BNB)
+
+The first run hit the OpenRouter credit limit; these 4 coins were fully covered at that point.
 
 ## Benchmark (4 coins, default risk settings): `leaderboard_4coins.md`
 

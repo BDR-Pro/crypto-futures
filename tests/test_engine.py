@@ -227,12 +227,16 @@ def test_robust_score_and_champion(tmp_path):
     assert robust_score({"p_value": 0.5}, windows) == pytest.approx(0.02)      # not significant: halved
     assert robust_score({"p_value": 0.5}, {"excess_median": -0.03}) == pytest.approx(-0.03)
     path = tmp_path / "champion.json"
-    champ, promoted = update_champion([{"strategy": "a", "robust_score": 0.01}], path)
+    setup = {"period": ["2026-01-01", "2026-04-01"], "risk": {"decision_hours": 24}, "symbols": ["BTCUSDT"]}
+    champ, promoted = update_champion([{**setup, "strategy": "a", "robust_score": 0.01}], path)
     assert promoted and champ["strategy"] == "a"
-    champ, promoted = update_champion([{"strategy": "b", "robust_score": -0.02}], path)
+    champ, promoted = update_champion([{**setup, "strategy": "b", "robust_score": -0.02}], path)
     assert not promoted and champ["strategy"] == "a"
-    champ, promoted = update_champion([{"strategy": "c", "robust_score": 0.03}], path)
+    champ, promoted = update_champion([{**setup, "strategy": "c", "robust_score": 0.03}], path)
     assert promoted and champ["strategy"] == "c"
+    other = {**setup, "symbols": ["BTCUSDT", "ETHUSDT"]}       # different coin set: separate champion
+    champ, promoted = update_champion([{**other, "strategy": "d", "robust_score": -0.5}], path)
+    assert promoted and champ["strategy"] == "d"
 
 
 def test_robustness_suite_end_to_end(tmp_path):

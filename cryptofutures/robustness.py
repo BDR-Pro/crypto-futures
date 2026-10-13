@@ -141,20 +141,36 @@ def robust_score(perm: dict, windows: dict) -> float:
 
 # ---- champion / challenger --------------------------------------------------------------
 
-def load_champion(path: str | Path = "results/champion.json") -> dict | None:
+def universe_key(report: dict) -> str:
+    """Champions are only comparable on the same test setup: period + coins + decision interval."""
+    return f"{report['period'][0]}..{report['period'][1]}|{report['risk']['decision_hours']}h|{','.join(sorted(report['symbols']))}"
+
+
+def load_champions(path: str | Path = "results/champion.json") -> dict[str, dict]:
     p = Path(path)
-    return json.loads(p.read_text()) if p.exists() else None
+    if not p.exists():
+        return {}
+    data = json.loads(p.read_text())
+    if "robust_score" in data:                      # older single-champion file
+        return {universe_key(data): data}
+    return data
+
+
+def load_champion(report: dict, path: str | Path = "results/champion.json") -> dict | None:
+    return load_champions(path).get(universe_key(report))
 
 
 def update_champion(reports: list[dict], path: str | Path = "results/champion.json") -> tuple[dict, bool]:
-    """Promote the best report if it beats the current champion's robust score."""
+    """Promote the best report if it beats the champion of the same test setup."""
     best = max(reports, key=lambda r: r["robust_score"])
-    current = load_champion(path)
+    champions = load_champions(path)
+    key = universe_key(best)
+    current = champions.get(key)
     promoted = current is None or best["robust_score"] > current["robust_score"]
     if promoted:
+        champions[key] = {**best, "crowned": datetime.now(timezone.utc).isoformat()}
         Path(path).parent.mkdir(parents=True, exist_ok=True)
-        Path(path).write_text(json.dumps({**best, "crowned": datetime.now(timezone.utc).isoformat()}, indent=2,
-                                         default=float))
+        Path(path).write_text(json.dumps(champions, indent=2, default=float))
     return (best if promoted else current), promoted
 
 
