@@ -1,0 +1,151 @@
+time,action,confidence,leverage,sl_pct,tp_pct,reason,symbol
+2026-09-26 00:00:00+00:00,LONG,0.68,2.0,0.059000000000000004,0.08900000000000001,"Strong uptrend, price above EMAs, high ADX, RSI moderate; risk‑reward fits rules",BTCUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,2.0,0.055999999999999994,0.084,"Strong uptrend, high ADX, price above EMAs, RSI moderate; risk‑reward fits limits",BTCUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,2.0,0.054000000000000006,0.081,"Strong uptrend, price above EMAs, high ADX; RSI moderate, risk managed with low leverage",BTCUSDT
+2026-09-29 00:00:00+00:00,LONG,0.66,2.0,0.055,0.083,"Strong uptrend, price above EMA20/50/200, high ADX, moderate RSI; risk‑reward fits limits",BTCUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,2.0,0.054000000000000006,0.081,"Strong uptrend, price above EMAs, high ADX; moderate RSI, set conservative stop and profit.",BTCUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.055,0.083,"Strong uptrend, price above EMAs, ADX high; moderate risk, set stop 2×ATR, leverage low.",BTCUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,2.0,0.054000000000000006,0.081,"Strong uptrend, price above EMA20/50/200, high ADX, RSI moderate; risk‑adjusted leverage fits stop‑loss limit.",BTCUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,5.0,0.02,0.035,"Strong uptrend, price above EMAs, high ADX, RSI moderate; risk‑reward fits leverage limit.",BTCUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,2.0,0.053,0.08,"Strong uptrend, price above EMAs, ADX high; moderate risk, set stop ~5%",BTCUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,3.0,0.052000000000000005,0.078,"Strong uptrend, price well above EMAs, high ADX, moderate RSI; risk‑reward fits guidelines",BTCUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,4.0,0.02,0.035,"Price above EMA20/50, strong ADX, bullish trend; stop within 2×ATR, TP 1.75× risk.",BTCUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,2.0,0.051,0.077,"Strong uptrend, price above EMAs, high ADX; moderate risk with 2× leverage.",BTCUSDT
+2026-10-08 00:00:00+00:00,LONG,0.62,3.0,0.04,0.06,"Strong uptrend, ADX high, price above EMA50/200, neutral RSI; risk‑reward fits rules",BTCUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals: price under EMA20, ADX high, but RSI neutral and MACD negative; risk outweighs reward.",BTCUSDT
+2026-10-10 00:00:00+00:00,LONG,0.58,3.0,0.03,0.05,"Price above EMA50/200, strong ADX, bullish trend; pullback offers entry with modest risk",BTCUSDT
+2026-09-26 00:00:00+00:00,LONG,0.68,2.0,0.07,0.105,"Strong uptrend, price far above EMAs, high ADX, bullish momentum; risk‑reward fits limits.",ETHUSDT
+2026-09-27 00:00:00+00:00,LONG,0.71,2.0,0.073,0.11,"Strong uptrend, price well above EMAs, high ADX; risk‑reward fits leverage limit.",ETHUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,2.0,0.071,0.107,"Strong uptrend, price above EMA20/50, high ADX, RSI moderate; risk‑reward fits rules",ETHUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Strong uptrend, price well above EMAs, high ADX; risk managed with modest leverage and stop beyond noise.",ETHUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,2.0,0.071,0.107,"Strong uptrend, price well above EMAs, ADX high; moderate risk, leverage limited to preserve capital",ETHUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Strong uptrend, price above EMAs, ADX high; risk manageable with low leverage",ETHUSDT
+2026-10-02 00:00:00+00:00,LONG,0.68,3.0,0.05,0.075,"Strong uptrend, price well above EMAs, high ADX, RSI moderate; risk‑reward fits limits.",ETHUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,5.0,0.02,0.035,"Price above EMA20/50, strong ADX, bullish trend; stop‑loss within 2 ATR, TP‑crossover ≈ 1.75×SL.",ETHUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,1.0,,,"Conflicting signals: strong trend but low volume, choppy recent closes and high ADX suggests uncertainty.",ETHUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,3.0,0.048,0.07200000000000001,"Strong uptrend, price well above EMAs, ADX high; moderate risk with 3x leverage and ATR‑based stops.",ETHUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,2.0,0.062,0.09300000000000001,"Strong uptrend, price well above EMA20/50, high ADX, moderate RSI; risk managed with low leverage.",ETHUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,2.0,0.06,0.09,"Strong uptrend, price above EMAs, high ADX; despite low volume, risk‑reward acceptable.",ETHUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price below EMA20, negative MACD, no clear edge; risk outweighs reward.",ETHUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price below EMAs, no clear reversal; risk outweighs reward",ETHUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price below short EMA, high ADX, but no clear edge; risk outweighs reward",ETHUSDT
+2026-09-26 00:00:00+00:00,LONG,0.68,1.0,0.092,0.138,"Strong uptrend, high ADX, price well above EMAs, RSI moderate",XRPUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,5.0,0.02,0.035,"Strong uptrend, price above EMA20/50, high ADX, bullish MACD, risk‑reward >1.5 with modest leverage.",XRPUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,1.0,0.091,0.13699999999999998,"Strong uptrend, price above EMAs, high ADX, moderate RSI; risk‑adjusted leverage low.",XRPUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.48,1.0,,,"High ADX, price near EMA20, mixed signals; risk outweighs reward.",XRPUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,1.0,0.091,0.13699999999999998,"Strong uptrend, price above EMAs, high ADX, neutral RSI; risk‑reward fits limits",XRPUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.48,1.0,,,"High ADX, mixed signals, MACD negative, low RSI, volume weak, risk outweighs reward.",XRPUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,1.0,0.085,0.128,"Strong uptrend, price above EMAs, high ADX; risk‑adjusted leverage low, TP > stop",XRPUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,1.0,0.085,0.128,"Strong uptrend, price above EMA20/50/200, high ADX; risk‑reward fits capital preservation.",XRPUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,1.0,,,"Conflicting signals, high ADX but price near EMA20, low volume, no clear edge.",XRPUSDT
+2026-10-05 00:00:00+00:00,LONG,0.58,3.0,0.02,0.03,"Uptrend, price above EMAs, high ADX; moderate RSI, acceptable risk with low leverage",XRPUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.5,1.0,,,"Strong uptrend but bearish momentum, low volume, funding cost; signals conflict, risk outweighs reward.",XRPUSDT
+2026-10-07 00:00:00+00:00,LONG,0.66,2.0,0.075,0.115,"Strong uptrend, price above EMAs, high ADX; risk‑reward fits guidelines.",XRPUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,1.0,,,"Conflicting signals: bullish EMA200, bullish EMA50, but price below EMA20 and high ADX indicates choppy trend.",XRPUSDT
+2026-10-09 00:00:00+00:00,SHORT,0.58,1.0,0.084,0.126,"Short term downtrend, price below EMA20, high ADX, RSI low; risk‑reward fits limits.",XRPUSDT
+2026-10-10 00:00:00+00:00,SHORT,0.62,1.0,0.106,0.159,"Strong ADX, price below EMA20, negative MACD; short bias with limited leverage",XRPUSDT
+2026-09-26 00:00:00+00:00,LONG,0.62,4.0,0.02,0.035,"Price above EMA20/50, strong ADX, bullish momentum, risk‑reward >1.5 with controlled leverage.",BNBUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,2.0,0.064,0.096,"Strong uptrend, price well above EMA20/50, ADX high, moderate RSI; risk‑reward fits rules.",BNBUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,2.0,0.061,0.092,"Strong uptrend, price above EMAs, ADX high; moderate risk, leverage limited to protect margin",BNBUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,2.0,0.063,0.095,"Strong uptrend, price above EMAs, ADX high; pullback within noise, risk‑reward favorable.",BNBUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,3.0,0.047,0.071,"Uptrend, price above EMAs, ADX strong; risk‑reward fits guidelines",BNBUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.062,0.09300000000000001,"Uptrend confirmed, price above EMAs, ADX strong; risk‑reward >1.5 with modest leverage",BNBUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,4.0,0.025,0.04,"Price above EMA20/50/200, ADX moderate, bullish trend, stop within 2.5% ATR, risk‑reward >1.5.",BNBUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.48,1.0,,,"Uptrend but mixed signals, low volume, MACD negative; risk outweighs reward",BNBUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,2.0,0.059000000000000004,0.09,"Price above EMAs, ADX moderate, RSI not overbought; bullish trend supports long with modest risk.",BNBUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,5.0,0.02,0.035,"Price above EMA20/50, ADX moderate, RSI not overbought; trend bullish bullish",BNBUSDT
+2026-10-06 00:00:00+00:00,LONG,0.58,2.0,0.055,0.083,"Uptrend, price above EMA20/50, ADX moderate, RSI not overbought; risk‑reward acceptable.",BNBUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.48,1.0,,,"Trend bullish but ADX moderate, mixed recent closes and low volume; risk outweighs reward.",BNBUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,1.0,0.02,0.03,"Mixed signals, ADX moderate, price near EMA20, low RSI edge, funding positive; risk outweighs reward.",BNBUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals: price below EMA20 but above EMA50/200, RSI not extreme, ADX moderate.",BNBUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price below EMA20 but above longer EMAs, no clear edge",BNBUSDT
+2026-09-26 00:00:00+00:00,FLAT,0.48,1.0,,,Strong uptrend but RSI overbought and high ADX; risk outweighs reward,SOLUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,2.0,0.067,0.1,"Strong uptrend, high ADX, price well above EMAs; risk‑reward acceptable with low leverage.",SOLUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,1.0,0.08800000000000001,0.132,"Strong uptrend, high ADX, price above EMAs; risk‑adjusted leverage low, stop beyond noise.",SOLUSDT
+2026-09-29 00:00:00+00:00,LONG,0.66,1.0,0.09,0.135,"Strong uptrend, high ADX, price well above EMAs; risk‑reward fits guidelines.",SOLUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,4.0,0.018000000000000002,0.03,"Strong uptrend, price above EMAs, high ADX, bullish momentum; risk within limits.",SOLUSDT
+2026-10-01 00:00:00+00:00,LONG,0.66,1.0,0.092,0.138,"Strong uptrend, price far above EMAs, high ADX, bullish momentum supports long",SOLUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,1.0,0.08800000000000001,0.132,"Strong uptrend, price far above EMA20/50, high ADX; moderate RSI, acceptable risk with low leverage.",SOLUSDT
+2026-10-03 00:00:00+00:00,LONG,0.68,1.0,0.09,0.135,"Strong uptrend, price well above EMAs, high ADX; risk‑reward fits guidelines.",SOLUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,2.0,0.064,0.096,"Strong uptrend, price well above EMAs, ADX high; risk‑adjusted leverage fits volatility.",SOLUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,2.0,0.08,0.125,"Strong uptrend, price well above EMAs, high ADX; RSI not extreme, risk managed with low leverage.",SOLUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,2.0,0.059000000000000004,0.08900000000000001,"Strong uptrend, price well above EMAs, ADX high; risk‑reward acceptable with modest leverage.",SOLUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,2.0,0.075,0.113,"Strong uptrend, price well above EMAs, high ADX, RSI moderate; risk‑reward fits leverage limit.",SOLUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,,,,"Strong uptrend but price below EMA20, MACD negative and recent pullback; risk outweighs reward",SOLUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals: price below EMA20 but above longer EMAs, high ADX, no clear edge.",SOLUSDT
+2026-10-10 00:00:00+00:00,LONG,0.58,1.0,0.09300000000000001,0.14,"Pullback to EMA20 in strong uptrend; risk‑reward acceptable, low leverage preserves capital.",SOLUSDT
+2026-09-26 00:00:00+00:00,LONG,0.62,1.0,0.122,0.183,"Strong uptrend, ADX >30, price above EMAs, moderate RSI; risk‑adjusted leverage low.",DOGEUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,5.0,0.018000000000000002,0.03,"Price above EMA20/50, ADX strong, bullish momentum, risk‑reward >1.5 with modest leverage.",DOGEUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Bullish trend, price above EMAs, ADX strong, moderate RSI; risk‑reward fits limits.",DOGEUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,1.0,0.09300000000000001,0.14,"Price above key EMAs, strong ADX, bullish MACD; trend outweighs short‑term dip",DOGEUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,2.0,0.061,0.092,"Price above EMA20/50, strong ADX, bullish trend outweighs modest risk",DOGEUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.06,0.09,"Strong uptrend, price above EMAs, ADX 32, moderate risk; leverage limited to keep risk <15%",DOGEUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Price above EMAs, strong ADX, pullback suggests continuation; risk‑adjusted leverage fits stop size.",DOGEUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, neutral RSI, negative MACD, price near EMA200; risk outweighs reward",DOGEUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price near EMA20, low volume, no clear edge; risk outweighs reward.",DOGEUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,1.0,0.083,0.125,"Uptrend, price above EMAs, moderate ADX; risk managed with low leverage and wide SL",DOGEUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.48,1.0,,,"Trend up but mixed signals, low volume, MACD negative; risk outweighs reward",DOGEUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.48,1.0,0.10800000000000001,0.162,"Mixed signals, neutral RSI, modest trend; risk outweighs reward",DOGEUSDT
+2026-10-08 00:00:00+00:00,SHORT,0.58,2.0,0.07,0.105,"Downtrend, price below EMA20, RSI neutral, moderate ADX, recent sharp drop suggests further decline",DOGEUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Downtrend, RSI not extreme, moderate ADX; risk outweighs reward, signals conflict.",DOGEUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,1.0,,,"Downtrend, no clear reversal, moderate ADX, risk outweighs reward",DOGEUSDT
+2026-09-26 00:00:00+00:00,FLAT,0.48,1.0,0.02,0.03,"Mixed signals, low ADX, price near EMA20, no clear edge.",TRXUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price hugging short-term EMAs, no clear edge; risk outweighs reward.",TRXUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, choppy price near EMAs, no clear edge.",TRXUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price near EMA20/50, mixed trend, risk outweighs reward.",TRXUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price hugging short‑term EMAs, no clear edge; risk outweighs reward.",TRXUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price near EMAs, mixed signals; risk outweighs reward.",TRXUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price hugging short‑term EMAs, no clear edge; risk outweighs reward.",TRXUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price hugging short‑term EMAs, no clear edge; risk outweighs reward.",TRXUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, mixed EMA signals, no clear edge; risk outweighs reward",TRXUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price near EMAs, no clear edge; risk outweighs reward.",TRXUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, mixed EMA signals, no clear edge; risk outweighs reward",TRXUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price hugging short‑term EMAs, mixed trend signals; risk outweighs reward.",TRXUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, price hugging EMAs, no clear edge; risk outweighs reward.",TRXUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Low ADX, mixed EMA signals, no clear edge; risk outweighs reward",TRXUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,1.0,,,"Weak ADX, price hugging EMAs, no clear edge; funding cost against longs; confidence below threshold",TRXUSDT
+2026-09-26 00:00:00+00:00,LONG,0.62,1.0,0.091,0.13699999999999998,"Strong uptrend, ADX >30, price above EMAs, moderate RSI, risk‑reward fits rules",ADAUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,1.0,0.094,0.141,"Strong uptrend, price above EMAs, ADX high; moderate risk, confidence above threshold",ADAUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,1.0,0.091,0.13699999999999998,"Strong uptrend, high ADX, price above EMAs, RSI moderate; risk‑reward fits rules",ADAUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,2.0,0.063,0.095,"Price above EMA20/50, strong ADX, bullish momentum, ATR‑based risk acceptable.",ADAUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,5.0,0.018000000000000002,0.03,"Price above EMA20/50, strong uptrend, ADX high, risk/reward >1.5 with moderate leverage.",ADAUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Strong uptrend, price above EMA20/50, ADX high, bullish MACD; risk‑reward fits leverage limit.",ADAUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,1.0,0.126,0.19,"Strong uptrend, price above EMAs, ADX high; risk‑reward acceptable with low leverage.",ADAUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Strong uptrend, price above EMAs, ADX high; risk‑reward acceptable with modest leverage.",ADAUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, ADX moderate, price near EMA20, funding positive; risk outweighs reward.",ADAUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,1.0,0.09300000000000001,0.14,"Uptrend, price above EMAs, ADX moderate; risk managed with low leverage and wide stop.",ADAUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,5.0,0.018000000000000002,0.03,"Price above EMA20/50, strong uptrend, ADX high, RSI not overbought yet; risk/reward >1.5.",ADAUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,1.0,0.092,0.14,"Strong uptrend, price above EMA20/50, high ADX, moderate RSI; risk‑reward fits rules.",ADAUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,1.0,,,Mixed signals: price above EMAs but recent drop and low buy ratio; risk outweighs reward.,ADAUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, EMA20 below price, ADX high, but RSI neutral and recent sharp drop; risk outweighs reward.",ADAUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price near EMA20, moderate ADX, no clear edge",ADAUSDT
+2026-09-26 00:00:00+00:00,LONG,0.71,1.0,0.113,0.17,"Strong uptrend, high ADX, price far above EMAs, bullish momentum; risk‑adjusted leverage low.",LINKUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,4.0,0.018000000000000002,0.03,"Strong uptrend, high ADX, price above EMAs, RSI below overbought; risk‑reward fits guidelines.",LINKUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,1.0,0.109,0.16399999999999998,"Strong uptrend, price far above EMAs, high ADX; risk managed with low leverage",LINKUSDT
+2026-09-29 00:00:00+00:00,LONG,0.58,1.0,0.11,0.165,"Strong uptrend, high ADX; despite overbought RSI, trend outweighs risk, low leverage for safety",LINKUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,1.0,0.091,0.13699999999999998,"Strong uptrend, high ADX, price well above EMAs, RSI moderate; risk‑reward fits limits",LINKUSDT
+2026-10-01 00:00:00+00:00,LONG,0.71,1.0,0.092,0.138,"Strong uptrend, price well above EMAs, high ADX, RSI moderate; risk‑reward fits limits.",LINKUSDT
+2026-10-02 00:00:00+00:00,LONG,0.66,2.0,0.059000000000000004,0.08900000000000001,"Strong uptrend, price far above EMAs, high ADX; risk‑reward fits limits.",LINKUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals: strong uptrend but price near upper Bollinger, high ADX, recent pull‑back suggests choppy.",LINKUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,2.0,0.05,0.075,"Strong uptrend, price far above EMAs, ADX high, moderate risk-reward",LINKUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,2.0,0.057999999999999996,0.087,"Strong uptrend, price well above EMAs, ADX high; risk‑reward acceptable with modest leverage.",LINKUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals: strong uptrend but negative MACD and high volatility, risk outweighs reward",LINKUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,1.0,0.084,0.126,"Uptrend confirmed, price near lower Bollinger, pullback offers risk‑reward >1.5",LINKUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, EMA20 below EMA50, ADX moderate, price near lower Bollinger, risk outweighs reward.",LINKUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed signals, price below EMA20, no clear edge; risk outweighs reward",LINKUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,1.0,,,"Mixed EMA signals, neutral RSI, negative MACD; risk outweighs reward, so stay flat.",LINKUSDT
+2026-09-26 00:00:00+00:00,FLAT,0.48,1.0,,,Strong uptrend but RSI overbought and price near upper Bollinger; risk outweighs reward.,AVAXUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.48,1.0,,,"Strong uptrend but RSI overbought, high ADX; risk outweighs reward",AVAXUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.48,1.0,,,Strong uptrend but RSI overbought and price near upper Bollinger; risk outweighs reward.,AVAXUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.48,1.0,,,"Strong ADX, but price near upper Bollinger, recent pullback, and funding cost discourages leveraged long.",AVAXUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.48,1.0,,,Strong uptrend but overbought RSI and high volatility; risk outweighs reward,AVAXUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,4.0,0.018000000000000002,0.03,"Strong uptrend, price above EMAs, high ADX, RSI moderate; risk within limits.",AVAXUSDT
+2026-10-02 00:00:00+00:00,LONG,0.71,1.0,0.102,0.153,"Strong uptrend, price far above EMAs, high ADX, moderate RSI; risk‑reward fits rules",AVAXUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,5.0,0.018000000000000002,0.03,"Strong uptrend, price above EMA20/50, high ADX; risk manageable with modest leverage.",AVAXUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,4.0,0.018000000000000002,0.03,"Strong uptrend, price above EMA20/50, high ADX, RSI not overbought; risk‑reward 1.7:1.",AVAXUSDT
+2026-10-05 00:00:00+00:00,LONG,0.6,1.0,0.095,0.14300000000000002,"Strong uptrend, ADX high, price far above EMAs, funding favorable; MACD slight bearish, low volume, moderate confidence.",AVAXUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,1.0,0.121,0.182,"Strong uptrend, price well above EMAs, ADX high; moderate RSI, acceptable risk with low leverage.",AVAXUSDT
+2026-10-07 00:00:00+00:00,LONG,0.68,1.0,0.115,0.17300000000000001,"Strong uptrend, high ADX, price well above EMAs, RSI not extreme; risk‑reward fits rules.",AVAXUSDT
+2026-10-08 00:00:00+00:00,LONG,0.62,1.0,0.12,0.18,"Strong uptrend, price far above EMAs, high ADX; moderate RSI, low leverage to preserve capital",AVAXUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,,,,"Mixed signals: price below EMA20 but still above EMA50/200, high ADX, no clear edge",AVAXUSDT
+2026-10-10 00:00:00+00:00,LONG,0.62,2.0,0.069,0.10400000000000001,"Strong uptrend, ADX high, price near EMA20 pullback; risk‑reward fits limits.",AVAXUSDT

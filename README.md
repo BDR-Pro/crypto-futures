@@ -140,8 +140,11 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 ## Sample results
 
-`results/sample/` holds the runs made while building this repo, all on a 4-core CPU with local models:
+`results/sample/` holds the runs made while building this repo:
 
+- **Hosted vs local, 10 coins, 26 Sep → 11 Oct:** Qwen3.6-27B (OpenRouter) −3.8%, buy-and-hold −5.0%,
+  gpt-oss-120b −7.7%, DeepSeek V4 Flash −7.9%, Bespoke-Nimble-9B −10.2%, Jev-Style 2B −27.6%. No model's direction
+  accuracy beat always-LONG, and all of them rarely short. The whole hosted run cost about $1.16 on OpenRouter.
 - **Jev-style 2B decision model, 10 coins, 30 days: −2.8%.** Buy-and-hold made +8.4%. The model said LONG
   87% of the time, and its probabilities did not predict the next day's move (correlation −0.07).
   It behaved like leveraged buy-and-hold: +26% at the peak, then lost in the 7 Oct sell-off.

@@ -3,6 +3,28 @@
 These runs prove the pipeline end to end. They are **not** evidence of a profitable strategy.
 Every model ran locally on a 4-core CPU with no GPU (llama.cpp / llama-cpp-python).
 
+## `openrouter-vs-local-10coins/`: hosted vs local models, all 10 coins, daily decisions, 26 Sep → 11 Oct 2026
+
+Same data, prompt (`v2`) and risk settings for every row. Hosted models ran through OpenRouter (about $1.16 in total);
+Nimble and Jev-Style ran locally on CPU. 150 decisions per model; DeepSeek still has 2 failed calls, counted as FLAT.
+
+| strategy | return | Sharpe | max DD | trades | win rate | avg lev | direction acc. | LONG / FLAT / SHORT |
+|---|---|---|---|---|---|---|---|---|
+| **Qwen3.6-27B** (OpenRouter) | **−3.8%** | −2.54 | −9.3% | 30 | 36.7% | 2.1 | 42.7% | 77 / 68 / 5 |
+| buy_and_hold (1x) | −5.0% | −4.25 | −9.3% | 10 | 0% | 1.0 | 45.3% | all LONG |
+| donchian_breakout | −5.3% | −4.59 | −9.5% | 7 | 42.9% | 3.0 | 48.6% | |
+| gpt-oss-120b (OpenRouter) | −7.7% | −8.50 | −8.4% | 27 | 18.5% | 1.8 | 40.6% | 93 / 54 / 3 |
+| DeepSeek V4 Flash (OpenRouter) | −7.9% | −8.09 | −8.9% | 28 | 25.0% | 2.6 | 38.8% | 63 / 83 / 4 |
+| Bespoke-Nimble-9B (local) | −10.2% | −8.29 | −11.5% | 18 | 5.6% | 2.4 | 33.8% | 80 / 70 / 0 |
+| random | −15.0% | −8.90 | −15.7% | 77 | 36.4% | 3.0 | 43.5% | |
+| ema_trend | −18.9% | −5.69 | −23.8% | 20 | 35.0% | 3.0 | 45.7% | |
+| Jev-Style 2B (local) | −27.6% | −7.44 | −31.4% | 12 | 0% | 4.1 | 43.8% | 126 / 20 / 4 |
+
+- Only Qwen3.6-27B beat buy-and-hold, and only by 1.2 points over 15 days. That is well within noise.
+- Every model's direction accuracy is **below** the 45.3% that always-LONG scored in this falling window,
+  so none showed forecasting skill. The better models lost less by going FLAT more and using less leverage.
+- Every model rarely or never shorts. That bias, not the coin choice, is what to work on next (prompt, more history, longer windows).
+
 ## `jev-style-2b-10coins/`: Jev-style decision model, all 10 coins, daily decisions, 11 Sep → 11 Oct 2026
 
 Model: `chaoliangUNSW/Jev-Style-Qwen3.5-2B-Decision-GGUF` (Q8_0), loaded in-process. It made 300 decisions at

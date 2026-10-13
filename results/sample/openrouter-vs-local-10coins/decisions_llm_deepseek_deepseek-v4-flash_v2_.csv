@@ -1,0 +1,151 @@
+time,action,confidence,leverage,sl_pct,tp_pct,reason,symbol
+2026-09-26 00:00:00+00:00,LONG,0.6,2.0,0.045,0.07,"Strong uptrend, pullback to buy, ADX high, RSI moderate.",BTCUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,3.0,0.03,0.05,Strong uptrend with high ADX and price above EMAs; low volume and near high warrant moderate leverage.,BTCUSDT
+2026-09-28 00:00:00+00:00,LONG,0.65,5.0,0.025,0.04,"Strong uptrend with high ADX, pullback consolidating near highs, low funding, clear stop below recent low.",BTCUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.4,1.0,,,"Trend up but recent pullback, RSI mid, Bollinger near top, no clear entry.",BTCUSDT
+2026-09-30 00:00:00+00:00,LONG,0.6,3.0,0.04,0.06,"Strong uptrend with ADX>40, pullback offers entry; RSI not overbought; risk managed with stop below recent low.",BTCUSDT
+2026-10-01 00:00:00+00:00,LONG,0.65,5.0,0.025,0.04,"Strong uptrend with high ADX, pullback offers entry; RSI neutral, funding low.",BTCUSDT
+2026-10-02 00:00:00+00:00,LONG,0.65,6.0,0.025,0.04,"Strong uptrend with ADX 41, price above EMAs, bounce from pullback. Manageable volatility.",BTCUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.5,,,,Trend up but short-term pullback; TP beyond recent high; low confidence.,BTCUSDT
+2026-10-04 00:00:00+00:00,LONG,0.65,4.0,0.025,0.0375,Strong uptrend with high ADX but low volume and negative MACD; cautious long.,BTCUSDT
+2026-10-05 00:00:00+00:00,LONG,0.6,5.0,0.025,0.0375,"Strong uptrend with high ADX, but low volume and high RSI warrant caution; moderate long.",BTCUSDT
+2026-10-06 00:00:00+00:00,LONG,0.65,4.0,0.025,0.0375,"Strong uptrend with high ADX, pullback offers entry; RSI not extreme, set stop below recent low.",BTCUSDT
+2026-10-07 00:00:00+00:00,LONG,0.65,3.0,0.038,0.057,"Strong uptrend, pullback near EMAs, high ADX, long with moderate leverage.",BTCUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.5,1.0,,,Conflicting signals: uptrend vs recent sharp decline. Low confidence. Stay flat.,BTCUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.5,,,,Conflicting trends: daily up vs short-term down. High ADX but direction unclear. Prefer flat to preserve capital.,BTCUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.5,1.0,,,"Conflicting signals: short-term downtrend vs longer-term uptrend, neutral RSI, low volume, no clear edge.",BTCUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,2.0,0.0576,0.0864,"Strong uptrend with high ADX, recent dip recovered, low funding.",ETHUSDT
+2026-09-27 00:00:00+00:00,LONG,0.65,4.0,0.035,0.0525,"Strong uptrend with high ADX, price above EMAs, RSI not overbought. Low volume suggests consolidation but trend favors longs.",ETHUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.5,,,,"Low volume, price near upper band, short-term pullback conflicts with uptrend.",ETHUSDT
+2026-09-29 00:00:00+00:00,LONG,0.6,2.0,0.035,0.0525,"Strong uptrend with high ADX, pullback to support; RSI moderate, risk/reward favorable.",ETHUSDT
+2026-09-30 00:00:00+00:00,LONG,0.6,2.0,0.03,0.045,Uptrend strong ADX; pullback offers entry; moderate confidence from short-term decline.,ETHUSDT
+2026-10-01 00:00:00+00:00,LONG,0.65,6.0,0.015,0.025,"Strong uptrend with high ADX, price above EMAs, consolidation, low funding. Trend-following with moderate risk.",ETHUSDT
+2026-10-02 00:00:00+00:00,LONG,0.65,4.0,0.035,0.055,"Strong uptrend, ADX 43, price above EMAs. Long with stop 1x ATR, leverage 4.",ETHUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.0,,,,Conflicting signals: uptrend but bearish momentum and pullback; risk/reward unclear.,ETHUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.45,,,,"Choppy price near EMAs, low volume, conflicting signals; prefer flat.",ETHUSDT
+2026-10-05 00:00:00+00:00,LONG,0.65,5.0,0.025,0.04,"Strong uptrend with high ADX, price above EMAs, momentum positive. Low volume but trend intact.",ETHUSDT
+2026-10-06 00:00:00+00:00,LONG,0.6,3.0,0.025,0.0375,"Strong uptrend with high ADX, but recent pullback and negative MACD hist reduce confidence; moderate risk-reward.",ETHUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.52,,,,Strong uptrend but momentum fading and price consolidating near highs with low volume.,ETHUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.5,,,,"Sharp drop below EMA20, negative momentum, taker selling; conflicting with higher timeframe uptrend. No clear reward/risk, stay flat.",ETHUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.0,,,,"Sharp drop, high volatility, conflicting trends; no clear edge.",ETHUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.5,1.0,,,Bearish trend but price near lower band and bouncing; risk of pullback high; confidence below threshold.,ETHUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,3.0,0.05,0.075,Strong uptrend ADX 39.7 EMAs aligned pullback recovered moderate leverage due high volatility,XRPUSDT
+2026-09-27 00:00:00+00:00,LONG,0.6,2.0,0.062400000000000004,0.09359999999999999,"Strong uptrend with high ADX, pullback offers entry; risk managed with ATR-based stop.",XRPUSDT
+2026-09-28 00:00:00+00:00,LONG,0.6,2.0,0.0604,0.0906,Strong uptrend with pullback; positive funding; high ADX supports trend continuation despite recent decline.,XRPUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.5,1.0,,,Trend up but recent pullback and high volatility; conflicting signals and no clear edge.,XRPUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.45,1.0,,,"Trend up but recent momentum down, high volatility, mixed signals. Capital preservation.",XRPUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.4,,,,Strong uptrend but recent pullback and high volatility; MACD negative; risk/reward unclear; preserve capital.,XRPUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.45,1.0,,,"Conflicting signals: uptrend but recent pullback, low volume, high volatility.",XRPUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.5,1.0,,,Trend up but recent pullback; high volatility and neutral momentum; reward/risk marginal.,XRPUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.3,1.0,,,Conflicting signals: daily uptrend but short-term decline; low volume and no clear reversal.,XRPUSDT
+2026-10-05 00:00:00+00:00,LONG,0.6,2.0,0.0776,0.1164,"Strong uptrend with high ADX, price above EMAs, but low volume and negative MACD warrant moderate confidence.",XRPUSDT
+2026-10-06 00:00:00+00:00,LONG,0.65,3.0,0.025,0.0375,"Strong uptrend with high ADX, but recent pullback and low volume warrant moderate confidence.",XRPUSDT
+2026-10-07 00:00:00+00:00,LONG,0.6,5.0,0.025,0.0375,"Uptrend strong ADX 44, pullback above EMAs, moderate confidence for continuation.",XRPUSDT
+2026-10-08 00:00:00+00:00,SHORT,0.55,2.0,0.07,0.105,"Strong downtrend with high ADX, break below EMA20 and recent low. Expect continuation, low leverage due to volatility.",XRPUSDT
+2026-10-09 00:00:00+00:00,SHORT,0.6,1.0,0.084,0.126,"Strong downtrend with high ADX, selling pressure; short with wide stop due to high volatility.",XRPUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.3,,,,"Weak bounce in strong downtrend, no reversal evidence. FLAT to preserve capital.",XRPUSDT
+2026-09-26 00:00:00+00:00,LONG,0.6,4.0,0.025,0.04,"Strong uptrend with high ADX, pullback to support; low volume cautious, moderate confidence.",BNBUSDT
+2026-09-27 00:00:00+00:00,LONG,0.65,5.0,0.02,0.03,"Strong uptrend with ADX 35, pullback within noise; moderate confidence due to low volume and upper band",BNBUSDT
+2026-09-28 00:00:00+00:00,LONG,0.65,3.0,0.05,0.075,"Strong uptrend, pullback from high, low funding, moderate RSI, volume low but trend intact.",BNBUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.5,1.0,,,"Short-term downtrend, neutral RSI, no clear entry signal; wait for confirmation.",BNBUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.5,1.0,,,"Signals conflict: daily uptrend but short-term momentum down, price near EMA20, no clear edge.",BNBUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,3.0,0.05,0.075,Uptrend intact with bounce from support; moderate confidence for trend continuation,BNBUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.0,,,,"Choppy market, low volume, price near EMAs, no clear conviction",BNBUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.5,,,,"Conflicting signals: daily uptrend but short-term decline. ADX moderate, RSI neutral. No clear edge.",BNBUSDT
+2026-10-04 00:00:00+00:00,LONG,0.65,5.0,0.03,0.045,"Uptrend with ADX 28, strong last bar, RSI moderate. Low funding cost.",BNBUSDT
+2026-10-05 00:00:00+00:00,LONG,0.65,3.0,0.05,0.075,"Uptrend with ADX 28, price above EMAs, recent breakout. Moderate volatility allows 3x leverage with 5% stop.",BNBUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.5,,,,"Signals mixed: uptrend but negative MACD and taker sell ratio, prefer flat.",BNBUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.5,1.0,,,Uptrend intact but recent pullback and neutral momentum; low volume and taker sell bias; risk/reward not clearly favorable.,BNBUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.5,,,,"Mixed signals: daily uptrend but short-term pullback, neutral RSI, no clear entry.",BNBUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.5,1.0,,,Conflicting trends: short-term bearish but daily uptrend intact. High volatility and no clear edge.,BNBUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.5,1.0,,,"Short-term downtrend, low volume, conflicting EMAs, no clear reversal signal",BNBUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,3.0,0.05,0.08,"Strong uptrend with high ADX, but RSI near overbought; moderate leverage for risk.",SOLUSDT
+2026-09-27 00:00:00+00:00,LONG,0.65,3.0,0.045,0.0675,Strong uptrend with high ADX; slight pullback but trend intact; moderate leverage to manage risk.,SOLUSDT
+2026-09-28 00:00:00+00:00,LONG,0.65,3.0,0.04,0.06,"Strong uptrend with high ADX, price above EMAs. Bullish momentum. Use moderate leverage due to high volatility.",SOLUSDT
+2026-09-29 00:00:00+00:00,LONG,0.6,3.0,0.045,0.0675,"Strong uptrend with pullback, buying dip with tight stop.",SOLUSDT
+2026-09-30 00:00:00+00:00,LONG,0.65,2.0,0.05,0.075,"Strong uptrend with high ADX, RSI moderate, slight pullback but trend intact. Long with moderate leverage.",SOLUSDT
+2026-10-01 00:00:00+00:00,LONG,0.6,2.0,0.0687,0.10300000000000001,"Strong uptrend with high ADX, recent pullback offers entry; low leverage to manage volatility.",SOLUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,4.0,0.0286,0.0429,"Strong uptrend with ADX 43, pullback to support; expect continuation.",SOLUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.4,1.0,,,Trend up but recent consolidation and high volatility; no clear entry.,SOLUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.5,,,,"Trend up but MACD negative, low volume, conflicting signals.",SOLUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.5,1.0,,,Uptrend strong but MACD bearish divergence and low volume. Risk/reward unclear.,SOLUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.0,,,,"Trend strong but momentum fading, low volume, choppy recent price action.",SOLUSDT
+2026-10-07 00:00:00+00:00,LONG,0.65,5.0,0.025,0.04,"Strong uptrend with high ADX, price above EMAs, RSI moderate. Long with moderate leverage.",SOLUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.5,1.0,,,Price at EMA20 after sharp drop; conflicting signals; wait for clearer direction.,SOLUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.5,1.0,,,"Conflicting trends, high volatility, and large stop distance required; risk/reward unclear.",SOLUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,1.0,,,Conflicting trends: short-term down vs daily up; high ADX but no reversal signal near lower band.,SOLUSDT
+2026-09-26 00:00:00+00:00,LONG,0.6,1.0,0.0917,0.1376,"Uptrend with ADX 33, price above EMAs, momentum positive. High volatility limits leverage but reward/risk 1.5.",DOGEUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.45,1.0,,,"High volatility, price near upper band, recent pullback, low volume; wait for clearer signal.",DOGEUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.5,,,,"Trend up but price near upper Bollinger, low volume, taker sell bias. Risk/reward unclear.",DOGEUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.3,1.0,,,Mixed signals; short-term bearish momentum vs daily uptrend; low confidence; choose flat.,DOGEUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.0,,,,"High volatility, recent pullback, neutral momentum; capital preservation preferred.",DOGEUSDT
+2026-10-01 00:00:00+00:00,LONG,0.6,3.0,0.04,0.06,Uptrend intact with ADX 32; pullback near EMA20 support; moderate confidence for trend continuation.,DOGEUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.0,,,,"Trend up but short-term weakness, low volume, neutral RSI; high volatility.",DOGEUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.4,1.0,,,"Mixed trend signals, high volatility, neutral RSI, funding cost, unclear direction",DOGEUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.5,,,,Conflicting signals: short-term uptrend vs recent decline and below EMA200. Low volume and narrow bar suggest indecision.,DOGEUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.5,1.0,,,"Choppy price action, high volatility, conflicting signals; prefer flat.",DOGEUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.0,1.0,,,"Mixed signals, high volatility, low volume, neutral RSI, prefer flat.",DOGEUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.0,,,,"Choppy market, neutral RSI, low volume, high volatility, no clear edge",DOGEUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.0,,,,"Conflicting signals, high volatility, no clear edge",DOGEUSDT
+2026-10-09 00:00:00+00:00,SHORT,0.6,2.0,0.064,0.096,"Downtrend strong, momentum bearish, volume confirms. Short with moderate confidence, low leverage due to high volatility.",DOGEUSDT
+2026-10-10 00:00:00+00:00,SHORT,0.6,1.0,0.09,0.135,"Bearish trend, price below EMAs, moderate ADX, short with low leverage due to high volatility.",DOGEUSDT
+2026-09-26 00:00:00+00:00,FLAT,0.5,1.0,,,"Low ADX, neutral RSI, recent decline, no clear trend.",TRXUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.5,1.0,,,"Low ADX, choppy market, conflicting trends, recent bearish closes.",TRXUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.45,,,,"Low ADX 12.8, price below EMAs but above EMA200, momentum mixed, no clear trend; choppy conditions favor flat.",TRXUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.3,1.0,,,"Low ADX, neutral RSI, price near EMAs; choppy market, no clear edge.",TRXUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.4,1.0,0.015,0.0225,"Low ADX choppy market, no clear trend or reversal signal.",TRXUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.5,1.0,,,"Low ADX 11.7, neutral RSI, choppy price near EMAs; no clear trend or edge.",TRXUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.0,,,,"Low ADX, choppy market, no clear trend, signals conflict.",TRXUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.0,1.0,,,"Low ADX 11.1, choppy market, price hugging EMAs, no clear trend.",TRXUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.45,1.0,,,"Low ADX, no trend, conflicting EMAs, neutral RSI, choppy market.",TRXUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.0,,,,"Low ADX, neutral RSI, price near EMAs, low volume - choppy market.",TRXUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.0,1.0,,,"Low ADX, neutral RSI, choppy price action, no clear edge.",TRXUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.3,1.0,,,"Low ADX 11, choppy price near EMAs, no clear trend or momentum.",TRXUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.0,1.0,,,"Low ADX 10.5, neutral RSI, choppy price near EMAs; no clear trend.",TRXUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.0,,,,"Low ADX, choppy market, no clear trend, bearish momentum not extreme",TRXUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.4,,,,"Low ADX 9.5, choppy market, no clear trend; FLAT to preserve capital.",TRXUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,2.0,0.07,0.105,"Strong uptrend with high ADX, price above EMAs, momentum bullish. Moderate leverage to manage volatility.",ADAUSDT
+2026-09-27 00:00:00+00:00,LONG,0.65,1.0,0.1,0.15,"Trend up with ADX 33.6, pullback near EMA support. Low leverage due to high volatility.",ADAUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.5,1.0,,,"Price near upper Bollinger band, high volatility, risk of pullback; trend strong but extended.",ADAUSDT
+2026-09-29 00:00:00+00:00,LONG,0.6,3.0,0.045,0.07400000000000001,"Bullish trend intact, pullback near EMA20 support, high ADX, low leverage.",ADAUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.5,,,,Recent pullback and high volatility; trend intact but risk/reward unclear; prefer flat.,ADAUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.4,1.0,,,"Mixed signals: uptrend but near resistance, short-term weakness, high volatility. FLAT for capital preservation.",ADAUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.5,,,,"Recent pullback, positive funding, and neutral RSI reduce conviction; reward/risk not clearly favorable.",ADAUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.5,1.0,,,"Conflicting signals: daily uptrend but short-term pullback, high volatility, positive funding, no clear edge.",ADAUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.3,1.0,,,"Trend up but recent pullback, low volume, high volatility; reward/risk unclear.",ADAUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,1.0,0.09300000000000001,0.14,"Strong uptrend with ADX>30, price above EMAs, recent breakout. High volatility but trend favors long. Use low leverage.",ADAUSDT
+2026-10-06 00:00:00+00:00,LONG,0.6,1.0,0.09,0.135,"Strong uptrend with high ADX and momentum, but high volatility warrants wide stop and low leverage.",ADAUSDT
+2026-10-07 00:00:00+00:00,LONG,0.6,2.0,0.0611,0.0917,"Strong uptrend with pullback, ADX high, RSI not overbought, risk-reward favorable.",ADAUSDT
+2026-10-08 00:00:00+00:00,LONG,0.6,3.0,0.05,0.075,"Uptrend intact, pullback to EMAs, ADX strong, buy dip with tight stop.",ADAUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.45,,,,High volatility and conflicting signals after large drop; no clear edge.,ADAUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,1.0,0.07,0.105,"Conflicting signals, high volatility, neutral RSI and funding cost. No clear edge.",ADAUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,2.0,0.056600000000000004,0.0849,"Strong uptrend with high ADX, price above EMAs, RSI not overbought. Volatile but trend-following with moderate leverage.",LINKUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.0,,,,error: Expecting ':' delimiter: line 1 column 5 (char 4),LINKUSDT
+2026-09-28 00:00:00+00:00,LONG,0.6,2.0,0.055,0.0825,"Strong uptrend with ADX 40, slight pullback provides entry; cautious stop below recent low",LINKUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,1.0,0.1104,0.1656,"Strong uptrend with high ADX, but overbought RSI; low leverage to manage volatility.",LINKUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.5,,,,Strong uptrend but pullback and high volatility; risk/reward not compelling; choose FLAT.,LINKUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.4,1.0,,,"Pullback from high, weak taker buy, high ATR; wait for confirmation.",LINKUSDT
+2026-10-02 00:00:00+00:00,LONG,0.65,3.0,0.03,0.045,"Strong uptrend with high ADX, moderate RSI, low funding; use moderate leverage due to high volatility.",LINKUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.5,1.0,,,High volatility and sharp pullback; trend intact but risk high; prefer flat.,LINKUSDT
+2026-10-04 00:00:00+00:00,LONG,0.65,2.0,0.06,0.09,"Strong uptrend ADX 38, pullback buying opportunity, RSI neutral, risk-reward favorable.",LINKUSDT
+2026-10-05 00:00:00+00:00,LONG,0.65,1.0,0.0864,0.12960000000000002,"Strong uptrend, high ADX, price above EMAs, recent pullback offers entry.",LINKUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.4,1.0,,,"Short-term downtrend, low volume, conflicting signals; prefer flat to preserve capital.",LINKUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.3,1.0,,,"Trend up but momentum weak, low volume, choppy price action; capital preservation.",LINKUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.5,1.0,,,Conflicting signals: short-term downtrend vs daily uptrend; low volume; neutral RSI; high volatility.,LINKUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.0,,,,"High volatility, conflicting trends (short-term down vs long-term up), price near EMA50 support, insufficient confidence.",LINKUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.0,,,,"Conflicting trends, low volume, high volatility; no clear edge.",LINKUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,2.0,0.0662,0.0993,"Strong uptrend, pullback support, ADX high, RSI moderate.",AVAXUSDT
+2026-09-27 00:00:00+00:00,LONG,0.65,2.0,0.075,0.1125,"Strong uptrend, ADX high, price above EMAs, pullback recovered. RSI overbought but trend strong.",AVAXUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.5,1.0,,,Strong uptrend but RSI overbought and price near upper band; conflicting signals favor flat.,AVAXUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.5,,,,Strong uptrend but high volatility and recent pullback create conflicting signals; risk/reward unclear.,AVAXUSDT
+2026-09-30 00:00:00+00:00,LONG,0.65,3.0,0.04,0.06,"Strong uptrend with high ADX, price above EMAs. Elevated RSI not extreme; use modest leverage due to high volatility.",AVAXUSDT
+2026-10-01 00:00:00+00:00,LONG,0.6,2.0,0.07,0.105,Strong uptrend with pullback; low leverage to manage high volatility.,AVAXUSDT
+2026-10-02 00:00:00+00:00,LONG,0.6,2.0,0.07,0.105,"Strong uptrend with high ADX, but high volatility and recent pullback warrant moderate leverage.",AVAXUSDT
+2026-10-03 00:00:00+00:00,LONG,0.6,2.0,0.07,0.105,"Strong uptrend with high ADX, slight pullback offers entry; high volatility requires low leverage.",AVAXUSDT
+2026-10-04 00:00:00+00:00,LONG,0.65,1.0,0.083,0.1245,"Strong uptrend with high ADX, price above EMAs. Low leverage to manage volatility.",AVAXUSDT
+2026-10-05 00:00:00+00:00,LONG,0.65,2.0,0.075,0.1125,"Strong uptrend with high ADX, but low volume and pullback; moderate confidence long.",AVAXUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,2.0,0.038,0.057,Strong uptrend with high ADX and negative funding; moderate confidence due to low volume and MACD negative.,AVAXUSDT
+2026-10-07 00:00:00+00:00,LONG,0.65,2.0,0.06,0.09,"Strong uptrend with high ADX, price above EMAs, momentum positive. Use moderate leverage due to high volatility.",AVAXUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.5,1.0,,,Conflicting signals: strong uptrend but sharp pullback and negative MACD. High volatility. FLAT for capital preservation.,AVAXUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.0,,,,error: no JSON object in response: ' ',AVAXUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,"Mixed signals: daily uptrend but price below EMA20, high ADX but MACD negative, low volume bounce. Risk high.",AVAXUSDT

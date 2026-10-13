@@ -1,0 +1,151 @@
+time,action,confidence,leverage,sl_pct,tp_pct,reason,symbol
+2026-09-26 00:00:00+00:00,LONG,0.68,4.0,0.035,0.06,"Strong daily uptrend (ADX 44.2, EMA alignment), healthy RSI, slight pullback offers entry. Negative funding favors longs. Risk/reward > 1.5.",BTCUSDT
+2026-09-27 00:00:00+00:00,LONG,0.58,3.0,0.035,0.055,"Strong daily trend (ADX 44.1, EMAs aligned) supports longs. Low volume and consolidation warrant conservative leverage and tight risk management.",BTCUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,4.0,0.035,0.06,"Strong uptrend (ADX 44.2, EMAs aligned) with healthy RSI. Low volume suggests consolidation before continuation. Risk managed with 4x leverage.",BTCUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,3.0,0.035,0.06,"Strong uptrend (ADX 43, EMAs aligned), price above key moving averages. Pullback offers entry. Low leverage manages high ATR volatility.",BTCUSDT
+2026-09-30 00:00:00+00:00,LONG,0.65,3.0,0.04,0.065,"Strong daily uptrend (ADX 42.3, above all EMAs) with healthy RSI. Pullback offers favorable risk/reward. Low funding cost.",BTCUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,4.0,0.035,0.055,"Strong daily trend (ADX 41.9, above EMAs) supports long, but short-term pullback and neutral flow warrant conservative sizing and wider stops.",BTCUSDT
+2026-10-02 00:00:00+00:00,LONG,0.65,3.0,0.04,0.065,Strong daily uptrend (ADX 41.4) with price above all EMAs. Stop beyond 1.5x ATR. Leverage scaled to volatility.,BTCUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,3.0,0.042,0.063,"Strong daily uptrend (ADX 41.6, above EMAs) with healthy RSI. Pullback offers entry. MACD slight divergence warrants conservative leverage.",BTCUSDT
+2026-10-04 00:00:00+00:00,LONG,0.58,3.0,0.035,0.055,"Strong daily uptrend & high ADX favor longs, but low volume & negative MACD histogram require conservative sizing and wider stops.",BTCUSDT
+2026-10-05 00:00:00+00:00,LONG,0.58,3.0,0.03,0.045,"Strong uptrend (ADX 42.5, above EMAs) favors longs. Low volume & RSI 68.6 warrant conservative leverage & tight risk management.",BTCUSDT
+2026-10-06 00:00:00+00:00,LONG,0.68,4.0,0.035,0.055,"Strong uptrend (ADX 43.2, above all EMAs), healthy pullback, RSI 64.5 allows upside. Risk/reward favors long.",BTCUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,3.0,0.03,0.048,"Strong trend (ADX 43.8, EMAs aligned) supports longs after pullback. Fading momentum warrants conservative sizing and strict risk management.",BTCUSDT
+2026-10-08 00:00:00+00:00,LONG,0.62,3.0,0.04,0.06,Strong daily uptrend with high ADX. Price pulled back to EMA20 support. Neutral momentum favors trend continuation over reversal.,BTCUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.45,,,,Conflicting signals: strong ADX trend vs bearish MACD/price below EMA20. RSI neutral. Capital preservation first.,BTCUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.42,,,,"Daily uptrend conflicts with short-term pullback, neutral RSI, low volume, and negative MACD. Waiting for clearer confirmation.",BTCUSDT
+2026-09-26 00:00:00+00:00,LONG,0.72,3.0,0.0576,0.1,"Strong uptrend (ADX 46.1, EMAs aligned), bullish momentum, and positive MACD. Stop set at 1.5x ATR below price.",ETHUSDT
+2026-09-27 00:00:00+00:00,LONG,0.6,3.0,0.045,0.075,Strong uptrend (ADX 45.6) with price above all EMAs. Healthy RSI and consolidation after rally favor continuation. Low volume warrants conservative leverage.,ETHUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,3.0,0.045,0.07,Strong daily uptrend with healthy pullback to EMA20; ADX confirms trend strength. Low volume warrants conservative sizing.,ETHUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,3.0,0.045,0.075,Strong daily trend and high ADX favor longs. Pullback near EMA20 offers entry. Low leverage preserves capital during consolidation.,ETHUSDT
+2026-09-30 00:00:00+00:00,LONG,0.65,2.0,0.05,0.08,"Strong daily uptrend (ADX 44, price > EMAs) with healthy pullback. Low leverage preserves capital against recent volatility. RSI 61.7 allows upside.",ETHUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,3.0,0.05,0.08,"Strong daily uptrend (ADX 43.5, above all EMAs) with healthy pullback. MACD dip offers entry. Risk managed via 3x leverage and 5% stop.",ETHUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,3.0,0.05,0.08,"Strong uptrend (ADX 43, above EMAs), healthy RSI 64, shallow pullback. Conservative leverage caps risk.",ETHUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,3.0,0.045,0.075,"Strong daily uptrend (ADX 43, EMAs aligned) with healthy pullback to EMA20. MACD dip offers trend-following entry. Risk managed via ATR-based stop.",ETHUSDT
+2026-10-04 00:00:00+00:00,LONG,0.58,2.0,0.05,0.075,Strong daily trend (ADX 43) and EMA alignment support longs; shallow pullback and healthy RSI favor continuation.,ETHUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,4.0,0.035,0.06,Strong daily uptrend with ADX 43.5 and price above all EMAs. Low volume and slight MACD divergence justify conservative leverage and tight risk management.,ETHUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,3.0,0.038,0.06,"Strong daily uptrend (ADX 43.7, above EMAs) supports long. Pullback entry offers favorable risk/reward. Leverage scaled to volatility.",ETHUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,3.0,0.045,0.075,"Strong daily uptrend (ADX 43.9, price above all EMAs). MACD dip offers pullback entry. Leverage scaled down for 3% ATR volatility.",ETHUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,,,,"Sharp pullback with bearish momentum conflicts with daily uptrend. RSI not oversold, MACD negative. Wait for reversal confirmation.",ETHUSDT
+2026-10-09 00:00:00+00:00,SHORT,0.65,2.0,0.06,0.09,"Strong bearish trend (ADX 39.3), price below EMAs, high volume breakdown, momentum confirms downside continuation.",ETHUSDT
+2026-10-10 00:00:00+00:00,SHORT,0.62,2.0,0.055,0.085,"Strong downtrend (ADX 37.4), price below key EMAs, bearish MACD/RSI. Low volume suggests continuation rather than reversal. Risk managed with low leverage.",ETHUSDT
+2026-09-26 00:00:00+00:00,LONG,0.62,1.0,0.08,0.12,"Strong daily trend and high ADX support longs, but price is extended near upper Bollinger band. Low leverage mitigates volatility risk.",XRPUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.42,,,,"Strong trend but price extended, low volume, bearish flow, and high volatility create poor risk/reward. Capital preservation first.",XRPUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,2.0,0.06,0.09,Strong uptrend (ADX 41.2) with healthy pullback above EMAs. Negative funding favors longs. Low leverage manages high ATR.,XRPUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,"Strong daily uptrend (ADX 41.2, above EMAs) with negative funding favoring longs. High volatility dictates low leverage and wide stops.",XRPUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.48,,,,"Strong trend conflicts with recent pullback, neutral RSI, and high ATR. Risk/reward unclear; preserving capital.",XRPUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.42,1.0,0.06,0.09,"Strong trend conflicts with fading momentum, low volume, and high ATR. Wide stops required; risk/reward unfavorable. Preserving capital.",XRPUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.45,,,,"Strong trend conflicts with weakening momentum, low volume, and high ATR. Mixed signals warrant FLAT for capital preservation.",XRPUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.48,1.0,,,Strong trend conflicts with fading momentum and high ATR. Signals mixed; capital preservation prioritized per rules.,XRPUSDT
+2026-10-04 00:00:00+00:00,LONG,0.58,1.0,0.08199999999999999,0.12300000000000001,Strong daily uptrend with pullback to EMA20 support. Low volume consolidation suggests trend continuation. High ATR warrants low leverage and wide stops.,XRPUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.45,,,,"Strong trend conflicts with low volume, negative MACD histogram, and high ATR. Poor risk/reward; capital preservation preferred.",XRPUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.45,,,,"Strong uptrend but MACD divergence, low volume, and high ATR create conflicting signals. Capital preservation first.",XRPUSDT
+2026-10-07 00:00:00+00:00,LONG,0.58,2.0,0.06,0.1,Price holds above EMA20 in strong ADX 44 uptrend. Low volume suggests selling exhaustion. Cautious long with conservative leverage.,XRPUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.45,,,,Conflicting signals: strong ADX trend vs bearish momentum/price below EMA20. High volatility and recent sharp drop warrant caution.,XRPUSDT
+2026-10-09 00:00:00+00:00,SHORT,0.58,1.0,0.084,0.126,"Strong bearish momentum, high ADX, and positive funding favor shorts; extreme volatility warrants low leverage and wide stops.",XRPUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,"Price below EMAs with bearish MACD, but ADX high. Conflicting signals and low volume warrant capital preservation.",XRPUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,3.0,0.045,0.09,"Strong uptrend (ADX 36.4, price > all EMAs), healthy RSI, pullback offers favorable risk/reward.",BNBUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.45,,,,Strong uptrend but price near upper Bollinger band with weak volume and flat MACD. Risk/reward unfavorable for new entry.,BNBUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.48,,,,"Strong uptrend conflicts with low volume, negative MACD, and shrinking ranges. Signals mixed; capital preservation prioritized.",BNBUSDT
+2026-09-29 00:00:00+00:00,LONG,0.58,3.0,0.0475,0.0713,Strong daily uptrend supports longs; price pulls back to EMA20 support. ATR-based SL/TP manages risk during consolidation.,BNBUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.52,,,,Conflicting signals: strong daily uptrend vs bearish short-term momentum and low volume. Preserving capital until clearer breakout.,BNBUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,3.0,0.038,0.06,"Bullish EMA alignment and ADX ~30 confirm uptrend. Pullback to EMA20 offers entry. RSI neutral, funding manageable. Risk-reward favors longs.",BNBUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.42,,,,"Bullish trend conflicts with weak momentum, low volume, and positive funding. Signals mixed; capital preservation prioritized.",BNBUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,4.0,0.035,0.06,Uptrend intact above EMAs with ADX 28.2; recent pullback offers favorable risk/reward entry aligned with daily momentum.,BNBUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,4.0,0.035,0.06,"Bullish trend above EMAs, ADX 28.1, RSI 62.5. Moderate volatility allows 4x leverage with 3.5% SL. TP 6% gives 1.7R reward.",BNBUSDT
+2026-10-05 00:00:00+00:00,LONG,0.58,3.0,0.04,0.065,Bullish daily trend above all EMAs with ADX >25. Low leverage offsets weak volume and high Bollinger band.,BNBUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,4.0,0.035,0.06,Strong daily uptrend with ADX>25. Pullback offers favorable entry. RSI healthy. Leverage scaled to volatility.,BNBUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.52,,,,"Trend is bullish but momentum fading, volume low, and positive funding increases long costs. Signals conflict; capital preservation preferred.",BNBUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.48,,,,"Signals conflict: daily trend bullish but short-term momentum negative, RSI neutral, and positive funding adds long cost. Awaiting clearer breakout or deeper re",BNBUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.5,,,,"Conflicting daily uptrend vs sharp short-term drop. RSI neutral, volatility spike. Capital preservation prioritized per rules.",BNBUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,"Conflicting signals, low volume, and consolidation after pullback. ADX moderate, RSI neutral. Capital preservation prioritized.",BNBUSDT
+2026-09-26 00:00:00+00:00,LONG,0.68,2.0,0.055,0.09,"Strong uptrend (ADX 44, above EMAs) with positive momentum. High ATR warrants low leverage. TP/SL ratio exceeds 1.5x.",SOLUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,"Strong daily uptrend (ADX 44.3, EMAs aligned). Conservative leverage due to high ATR and positive funding cost.",SOLUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.45,,,,Price near upper Bollinger band with RSI 68.6 and strong ADX. Reward/risk poor for new longs; wait for pullback or breakout confirmation.,SOLUSDT
+2026-09-29 00:00:00+00:00,LONG,0.68,3.0,0.045,0.075,"Strong uptrend (ADX 44.5, EMAs aligned), bullish momentum, pullback to support offers favorable risk/reward. High volatility warrants low leverage.",SOLUSDT
+2026-09-30 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,"Strong uptrend (ADX 44, price > all EMAs), RSI 63.5 allows upside, negative funding favors longs. Low leverage manages high ATR volatility.",SOLUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,Strong daily uptrend with high ADX and price above all EMAs. Healthy RSI supports continuation. Low leverage offsets high ATR volatility.,SOLUSDT
+2026-10-02 00:00:00+00:00,LONG,0.6,2.0,0.055,0.09,"Strong daily trend (ADX 43.1, above EMAs) supports long, but weak volume/momentum warrants conservative sizing on pullback.",SOLUSDT
+2026-10-03 00:00:00+00:00,LONG,0.6,2.0,0.045,0.0675,Strong daily trend (ADX 43) with pullback to EMA20. Low funding favors longs. Conservative sizing due to high ATR.,SOLUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.45,,,,"Strong daily trend but low volume, negative MACD, and seller pressure signal consolidation. Waiting for clearer momentum.",SOLUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,2.0,0.06,0.09,"Strong uptrend (ADX 44, price above EMAs) favors long. Low volume & slight MACD divergence warrant conservative leverage and 1.5R reward.",SOLUSDT
+2026-10-06 00:00:00+00:00,LONG,0.62,3.0,0.04,0.065,"Strong daily uptrend (ADX 44, price > EMAs). RSI 64 allows room. MACD dip offers pullback entry. Low funding cost supports long bias.",SOLUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,3.0,0.045,0.075,"Strong daily uptrend (ADX 44.2, price above all EMAs). RSI healthy. MACD dip offers pullback entry. Low funding cost supports long bias.",SOLUSDT
+2026-10-08 00:00:00+00:00,LONG,0.58,3.0,0.042,0.07,"Strong daily uptrend (ADX 43, EMA alignment) supports long on EMA20 pullback. Low leverage manages high ATR volatility.",SOLUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,,,,Daily trend bullish but short-term momentum strongly bearish with high volatility. Signals conflict; wait for stabilization or RSI reversal.,SOLUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.48,,,,Conflicting signals: long-term bullish but short-term bearish momentum with low volume. RSI not extreme for counter-trend. Capital preservation prioritized.,SOLUSDT
+2026-09-26 00:00:00+00:00,LONG,0.65,1.0,0.092,0.15,"Strong daily uptrend with ADX 33.1, price recovered from pullback. High volatility warrants low leverage and wide stops.",DOGEUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.42,,,,Price overextended +13% above EMA50 with low volume and recent pullback. High volatility and mixed signals favor waiting for a clearer setup.,DOGEUSDT
+2026-09-28 00:00:00+00:00,LONG,0.68,3.0,0.045,0.075,Strong daily uptrend with ADX 33.7. Healthy pullback to support. RSI neutral-bullish. Positive funding is a minor cost but trend alignment justifies long.,DOGEUSDT
+2026-09-29 00:00:00+00:00,LONG,0.62,2.0,0.062,0.09300000000000001,"Strong uptrend (ADX 33, EMA alignment) with healthy pullback to EMA20 support. Low leverage manages high ATR volatility.",DOGEUSDT
+2026-09-30 00:00:00+00:00,LONG,0.6,2.0,0.065,0.1,Bullish daily trend with ADX 32.4 and price above key EMAs. Pullback offers entry. Low leverage manages high ATR volatility.,DOGEUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.45,1.0,0.0603,0.09050000000000001,High volatility (6% ATR) and choppy recent action outweigh bullish trend. Capital preservation first.,DOGEUSDT
+2026-10-02 00:00:00+00:00,LONG,0.58,2.0,0.057999999999999996,0.09,Daily uptrend intact (ADX 31.7). Pullback into EMA support offers entry. Low volume & positive funding limit leverage.,DOGEUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.45,,,,Conflicting signals: bullish short-term EMAs vs bearish momentum and MACD. High volatility and price below EMA200 favor capital preservation.,DOGEUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,1.0,0.06,0.09,"Conflicting signals, low volume, price below EMA200, and recent consolidation indicate choppy market. Capital preservation prioritized.",DOGEUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,2.0,0.065,0.105,Bullish daily trend with price above EMAs and ADX 29.1. Low volume and positive funding warrant conservative leverage and wide stops.,DOGEUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.48,,,,"Conflicting signals: bullish trend vs negative MACD, low volume, and slight bearish flow. Capital preservation prioritized.",DOGEUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.45,1.0,0.025,0.04,"Conflicting signals, neutral RSI, negative MACD, low volume, and price hugging EMAs warrant waiting for clearer direction.",DOGEUSDT
+2026-10-08 00:00:00+00:00,SHORT,0.58,2.0,0.06,0.095,"Daily bearish trend, strong recent sell-off, negative MACD, and seller dominance support short. High volatility warrants low leverage and wide stops.",DOGEUSDT
+2026-10-09 00:00:00+00:00,SHORT,0.62,1.0,0.096,0.14400000000000002,"Strong downtrend below all EMAs, positive funding favors shorts, high volatility warrants low leverage and wide stops.",DOGEUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,Price below all EMAs with weak momentum. ADX 25.2 indicates choppy market. Low volume and conflicting signals favor capital preservation.,DOGEUSDT
+2026-09-26 00:00:00+00:00,FLAT,0.45,,,,"Low ADX, neutral RSI, flat MACD, and price hugging EMAs signal choppy market. Capital preservation requires staying flat.",TRXUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.45,1.0,0.02,0.03,Low ADX (13.4) indicates choppy market. Conflicting signals: price below short EMAs but above EMA200. RSI neutral. Capital preservation prioritized.,TRXUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.45,,,,"Low ADX indicates choppy market. Conflicting signals, weak momentum, and sub-average volume favor capital preservation. No clear edge.",TRXUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.45,,,,"Low ADX (12), price hugging EMAs, neutral RSI, and sub-average volume indicate choppy conditions. Capital preservation dictates staying flat.",TRXUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.45,,,,"Low ADX, price hugging EMAs, neutral momentum, and low volume signal choppy market. Capital preservation requires staying flat.",TRXUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.45,,,,"Low ADX (11.7), neutral RSI (50.6), and price hugging EMAs indicate a choppy market. Capital preservation dictates staying flat.",TRXUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.45,,,,ADX 11.4 and neutral RSI signal choppy consolidation. Conflicting trends and balanced flow warrant staying flat to preserve capital.,TRXUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.45,,,,"Low ADX, price hugging EMAs, neutral momentum, and low volume signal choppy market. Capital preservation requires staying flat.",TRXUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.45,,,,"Low ADX (11), price hugging EMAs, neutral RSI, and sub-average volume indicate choppy conditions. Capital preservation requires staying flat.",TRXUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.45,1.0,0.02,0.03,Low ADX (10.9) indicates choppy market. Price hugging EMAs with neutral RSI. Capital preservation prioritized.,TRXUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.4,,,,"ADX 10.9 indicates choppy market. Price hugs EMAs, RSI neutral, volume low. Capital preservation dictates staying flat.",TRXUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.45,1.0,0.02,0.03,Low ADX (11) indicates choppy market. Price hugging EMAs with neutral RSI. Capital preservation prioritized.,TRXUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.45,,,,"Low ADX (10.5) and neutral RSI indicate choppy, range-bound conditions. Price hugs EMAs with flat momentum. Capital preservation requires staying flat.",TRXUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.42,,,,Low ADX (9.9) and price hugging EMAs indicate choppy conditions. Conflicting signals and neutral momentum favor capital preservation.,TRXUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,ADX 9.5 indicates choppy market. Price hugs EMAs with low volume and neutral RSI. Conflicting signals warrant capital preservation.,TRXUSDT
+2026-09-26 00:00:00+00:00,FLAT,0.48,,,,Price extended at upper Bollinger band with high ATR. Poor risk/reward for new longs; counter-trend shorts lack reversal confirmation.,ADAUSDT
+2026-09-27 00:00:00+00:00,FLAT,0.45,1.0,0.0625,0.09380000000000001,Price near upper Bollinger band with high ATR and positive funding. RSI 64.8 shows strength but lacks clear breakout confirmation. Capital preservation first.,ADAUSDT
+2026-09-28 00:00:00+00:00,FLAT,0.42,,,,Price extended +10% above EMA20 with low volume and neutral flow. Consolidation phase favors waiting for pullback or breakout.,ADAUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.48,1.0,,,Price near upper Bollinger band with recent pullback and conflicting momentum signals. ADX strong but RSI neutral. Capital preservation preferred.,ADAUSDT
+2026-09-30 00:00:00+00:00,LONG,0.58,2.0,0.065,0.098,Uptrend intact with healthy pullback; ADX confirms strength. Low leverage manages high ATR.,ADAUSDT
+2026-10-01 00:00:00+00:00,FLAT,0.48,,,,"High ATR (6.38%) forces wide stops, compressing leverage to 1-2x. Recent pullback and neutral flow reduce edge. Capital preservation first.",ADAUSDT
+2026-10-02 00:00:00+00:00,FLAT,0.48,,,,High ATR (6.28%) and positive funding increase risk/cost. Recent pullback lacks reversal confirmation. Signals conflict; capital preservation prioritized.,ADAUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.45,,,,Conflicting signals: strong daily uptrend vs negative MACD histogram and recent 6-bar pullback. High ATR (6.5%) increases risk. Capital preservation first.,ADAUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,2.0,0.0625,0.1,Daily trend bullish with aligned EMAs and ADX>25. Pullback offers entry. Conservative sizing due to low volume and slight MACD divergence.,ADAUSDT
+2026-10-05 00:00:00+00:00,LONG,0.62,2.0,0.07400000000000001,0.111,"Strong daily uptrend, ADX 32.6, price above EMAs. High volatility warrants low leverage. Positive funding is a minor cost.",ADAUSDT
+2026-10-06 00:00:00+00:00,LONG,0.6,2.0,0.065,0.1,"Strong uptrend with high ADX supports long, but extended price and volatility demand low leverage and wide stop.",ADAUSDT
+2026-10-07 00:00:00+00:00,LONG,0.58,1.0,0.064,0.096,"Strong daily trend (ADX 34.6, above EMAs) supports longs, but overextension (Boll 0.85, RSI 66.7) warrants low leverage and wide stops.",ADAUSDT
+2026-10-08 00:00:00+00:00,FLAT,0.45,1.0,,,High volatility (6.5% ATR) and recent sharp pullback (-4.45%) create poor risk/reward. ADX strong but price choppy near EMAs. Capital preservation first.,ADAUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.42,1.0,0.08,0.12,"Conflicting trend signals, extreme volatility after -9% drop, and neutral RSI warrant capital preservation. No clear edge.",ADAUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,"Conflicting signals, extreme volatility, low volume, and confidence below 0.55. Capital preservation prioritized.",ADAUSDT
+2026-09-26 00:00:00+00:00,LONG,0.62,2.0,0.065,0.105,"Strong uptrend (ADX 40.1, above EMAs) with elevated volume. Extended near upper BB warrants low leverage and wide stop.",LINKUSDT
+2026-09-27 00:00:00+00:00,LONG,0.68,2.0,0.07,0.11,"Strong uptrend (ADX 40, EMAs aligned) with positive momentum. High volatility dictates low leverage. TP/SL respects 1.5x ratio.",LINKUSDT
+2026-09-28 00:00:00+00:00,LONG,0.62,2.0,0.065,0.105,"Strong uptrend (ADX 40.1, price > EMAs) with positive MACD. Near upper BB & neutral flow warrant low leverage & wide stop.",LINKUSDT
+2026-09-29 00:00:00+00:00,FLAT,0.45,,,,"Strong trend but severely overextended (RSI 74, above upper BB). High volatility and poor risk/reward favor waiting for pullback. Capital preservation first.",LINKUSDT
+2026-09-30 00:00:00+00:00,LONG,0.68,1.0,0.075,0.12,"Strong uptrend (ADX 41.8, price > all EMAs) with healthy pullback. High volatility warrants low leverage. TP/SL ratio > 1.5.",LINKUSDT
+2026-10-01 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,Strong daily uptrend (ADX 41.7) with healthy pullback. Low leverage manages high volatility. Momentum supports continuation.,LINKUSDT
+2026-10-02 00:00:00+00:00,LONG,0.65,2.0,0.06,0.1,Strong daily uptrend with high ADX. Healthy pullback offers entry. Low leverage manages high ATR volatility.,LINKUSDT
+2026-10-03 00:00:00+00:00,FLAT,0.48,,,,"Strong uptrend conflicts with sharp pullback, neutral RSI, and bearish flow. High ATR increases risk. Capital preservation dictates waiting for trend resumption",LINKUSDT
+2026-10-04 00:00:00+00:00,FLAT,0.48,,,,"Strong uptrend but price pulling back from highs with low volume and neutral flow. High ATR widens stops, reducing R/R. Wait for confirmation.",LINKUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.48,1.0,0.0864,0.12960000000000002,"Strong daily trend but fading momentum, low volume, and high ATR create poor risk/reward. Signals conflict; capital preservation prioritized.",LINKUSDT
+2026-10-06 00:00:00+00:00,FLAT,0.45,1.0,,,"Conflicting signals: strong daily uptrend vs recent 6-bar pullback, negative MACD histogram, low volume, and choppy price action. Capital preservation priorit.",LINKUSDT
+2026-10-07 00:00:00+00:00,FLAT,0.45,,,,"Bullish trend conflicts with negative MACD, low volume, and high volatility. Waiting for clearer directional conviction.",LINKUSDT
+2026-10-08 00:00:00+00:00,LONG,0.58,2.0,0.059000000000000004,0.08900000000000001,Bullish daily trend pullback to EMA50; low leverage manages high ATR risk.,LINKUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.48,1.0,,,Signals conflict: long-term bullish but sharp short-term pullback with negative MACD and high ATR. No clear edge; capital preservation prioritized.,LINKUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,Conflicting signals: daily bullish vs short-term bearish pullback. Low volume and high volatility favor waiting for clearer trend resumption.,LINKUSDT
+2026-09-26 00:00:00+00:00,LONG,0.6,2.0,0.07,0.11,Strong daily trend and high ADX favor longs. Recent pullback provides entry. Low leverage manages high volatility risk.,AVAXUSDT
+2026-09-27 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,Strong uptrend (ADX 45.5) with healthy pullback; RSI elevated but trend intact. Low leverage manages high volatility.,AVAXUSDT
+2026-09-28 00:00:00+00:00,LONG,0.58,1.0,0.096,0.15,"Strong uptrend (ADX 46.5, above EMAs) supports long, but high RSI and positive funding warrant low leverage and wide stop.",AVAXUSDT
+2026-09-29 00:00:00+00:00,LONG,0.65,1.0,0.1,0.15,"Strong uptrend (ADX 46, above EMAs), healthy pullback from highs, high volatility warrants low leverage.",AVAXUSDT
+2026-09-30 00:00:00+00:00,FLAT,0.45,,,,"Strong uptrend but severely overextended (RSI 71.7, +17.5% vs EMA20). Neutral flow and positive funding increase risk. Wait for pullback.",AVAXUSDT
+2026-10-01 00:00:00+00:00,LONG,0.6,1.0,0.14,0.21,Strong uptrend pullback. Extreme volatility requires 2x ATR stop and 1x leverage. Trend-following long.,AVAXUSDT
+2026-10-02 00:00:00+00:00,LONG,0.62,2.0,0.07,0.105,"Strong uptrend (ADX 47.3, price > EMAs), healthy RSI, negative funding favors longs. Low volume warrants conservative leverage.",AVAXUSDT
+2026-10-03 00:00:00+00:00,LONG,0.62,1.0,0.085,0.13,"Strong daily uptrend (ADX 46.8, price > EMAs) supports longs. High ATR demands 1x leverage and wide stops. Minor pullback offers trend continuation entry.",AVAXUSDT
+2026-10-04 00:00:00+00:00,LONG,0.62,2.0,0.065,0.1,"Strong daily uptrend, high ADX, price above EMAs. Negative funding favors longs. Low volume warrants conservative leverage.",AVAXUSDT
+2026-10-05 00:00:00+00:00,FLAT,0.48,,,,"Trend is strong but price is extended, volume is low, and momentum is fading. Conflicting signals and poor risk/reward warrant waiting.",AVAXUSDT
+2026-10-06 00:00:00+00:00,LONG,0.6,2.0,0.06,0.09,"Strong uptrend (ADX 45.1, EMAs aligned) with healthy pullback; low volume suggests consolidation before continuation.",AVAXUSDT
+2026-10-07 00:00:00+00:00,LONG,0.62,1.0,0.085,0.13,"Strong daily uptrend (ADX 45, EMA alignment) supports long. High ATR dictates 1x leverage and wide 8.5% stop. TP/SL ratio 1.53 meets risk rules.",AVAXUSDT
+2026-10-08 00:00:00+00:00,LONG,0.58,2.0,0.073,0.11,"Strong daily trend (ADX 44.4, above EMAs) supports longs; high volatility requires low leverage and wide stops.",AVAXUSDT
+2026-10-09 00:00:00+00:00,FLAT,0.45,1.0,,,Daily uptrend conflicts with sharp short-term drop and bearish MACD. High volatility and neutral RSI keep confidence below threshold.,AVAXUSDT
+2026-10-10 00:00:00+00:00,FLAT,0.45,,,,Conflicting signals: price below EMA20 with bearish MACD despite strong ADX and higher EMAs. Low volume and neutral RSI suggest choppy consolidation. Capital保全.,AVAXUSDT
