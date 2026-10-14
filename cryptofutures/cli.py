@@ -89,6 +89,10 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--guards", default="reduce_leverage,tighten_stop,off")
     sp.add_argument("--tag", default="")
 
+    sp = sub.add_parser("quarters", help="per-quarter returns per strategy vs buy-and-hold (bold = beat it)")
+    common(sp)
+    sp.add_argument("--strategies", default="buy_and_hold,ema_trend")
+
     sp = sub.add_parser("history", help="show every benchmark run so far, best first")
     sp.add_argument("--rank-by", default="sharpe")
     sp.add_argument("--top", type=int, default=20)
@@ -168,6 +172,10 @@ def main(argv: list[str] | None = None) -> None:
                                      a.start, a.end, tag=a.tag)
         print(format_leverage_table(df))
         print(f"\nresults: {run_dir}/")
+
+    elif a.cmd == "quarters":
+        from .benchmark import format_quarterly, quarterly_report
+        print(format_quarterly(quarterly_report(cfg, [x.strip() for x in a.strategies.split(",")], a.start, a.end)))
 
     elif a.cmd == "history":
         from .benchmark import format_table, load_history

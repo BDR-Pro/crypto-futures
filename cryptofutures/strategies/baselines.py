@@ -121,5 +121,17 @@ class TrendLongShort(Strategy):
         return _frame(times, actions, confidence=0.7, reason="long unless confirmed downtrend")
 
 
+class TrendHybrid(Strategy):
+    """Buy-and-hold core with a short overlay: long by default, short only in a confirmed, strong downtrend
+    (EMA20 < EMA50, price < EMA200, ADX > 20). No stops, like buy-and-hold; the rule itself is the exit."""
+    name = "trend_hybrid"
+    use_stops = False
+
+    def decide(self, symbol, store, times):
+        b = _aligned_bars(store, times)
+        down = (b["ema20"] < b["ema50"]) & (b["close"] < b["ema200"]) & (b["adx14"] > 20)
+        return _frame(times, np.where(down, SHORT, LONG), confidence=0.7, reason="long unless strong downtrend")
+
+
 BASELINES = {cls.name: cls for cls in (BuyAndHold, Flat, RandomStrategy, EmaTrend, DonchianBreakout, RsiReversion,
-                                       TrendFilterLong, TrendLongShort)}
+                                       TrendFilterLong, TrendLongShort, TrendHybrid)}

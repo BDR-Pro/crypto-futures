@@ -1,0 +1,13 @@
+# The strategy that beat buy-and-hold over Sep 2024 -> Oct 2026 (paper trading only).
+# Use: cryptofutures -c results/sample/beats-buy-and-hold/ema_trend_ride.toml paper --strategy ema_trend
+[risk]
+decision_hours = 24          # daily decisions; 4-hourly over-trades and loses
+leverage_override = 1        # 1x: half buy-and-hold's drawdown; more leverage deepened drawdowns fast
+sl_source = "atr"
+atr_sl_mult = 1.5            # walk-forward picked 1.5x ATR in every fold (3x also works)
+reward_risk = 100.0          # no take-profit: let winners run (picked in every walk-forward fold)
+max_sl_pct = 0.25
+min_confidence = 0.0
+flat_closes = true
+max_open_positions = 16
+margin_per_trade = 0.05
