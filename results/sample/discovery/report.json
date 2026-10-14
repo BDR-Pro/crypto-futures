@@ -1,0 +1,162 @@
+{
+  "finalists": [
+    {
+      "id": "c0238",
+      "idea": "Shock-Cooled Chandelier Ensemble",
+      "hypothesis": "Relative momentum and market breadth capture persistent trends, while chandelier exits limit losses when individual coins reverse. Blending two related trend books reduces dependence on either entry rule; a short cooldown after unusually large moves avoids immediately holding positions against a potential regime change.",
+      "model": "openai/gpt-6-sol",
+      "metrics": {
+        "score": 1.4206882699097874,
+        "cells": [
+          1.231,
+          3.017,
+          0.989,
+          1.39,
+          3.038,
+          1.402
+        ],
+        "sharpe": 2.194523151178722,
+        "cagr": 0.3764162603881236,
+        "total": 4.793403825816325,
+        "max_dd": -0.09581689385382486,
+        "vol": 0.15080671939138496,
+        "exposure": 0.19536681014768406,
+        "net_long": 0.04954392039775622,
+        "turnover_per_year": 22.73703551303348
+      },
+      "code": "def strategy(data):\n    close, high, low = data[\"close\"], data[\"high\"], data[\"low\"]\n    returns = close.pct_change(fill_method=None)\n    mom30 = close.pct_change(30, fill_method=None)\n    vol50 = returns.rolling(50).std()\n    vol30 = returns.rolling(30, min_periods=15).std()\n\n    relative_mom = mom30.sub(mom30.mean(axis=1), axis=0)\n    rank = (relative_mom * (1.0 / vol50).clip(upper=100.0)).rank(axis=1, pct=True)\n    ranked = ((rank - 0.5) * 2.0).clip(-1.0, 1.0)\n\n    btc = close[\"BTC\"]\n    btc_ma = btc.rolling(100).mean()\n    bull = btc > btc_ma\n    bear = btc < btc_ma\n    btc_strength = ((btc / btc_ma - 1.0).clip(-0.1, 0.1) / 0.1).rolling(5).mean()\n\n    ma20 = close.rolling(20, min_periods=10).mean()\n    ma50 = close.rolling(50, min_periods=30).mean()\n    own_up100 = close > close.rolling(100).mean()\n    own_down20 = close < close.rolling(20).mean()\n    ema_fast = close.ewm(span=20, adjust=False).mean()\n    ema_slow = close.ewm(span=50, adjust=False).mean()\n\n    inv_vol = (1.0 / vol30).clip(upper=50.0)\n    inv_vol = inv_vol.div(inv_vol.mean(axis=1), axis=0)\n\n    breadth = (close > ma50).astype(float).where(close.notna() & ma50.notna()).mean(axis=1)\n    participation = pd.Series(0.0, index=close.index)\n    participation[breadth >= 0.25] = 0.5\n    participation[breadth >= 0.60] = 1.0\n    breadth_book = (np.sign(mom30) * inv_vol).where(mom30.abs() >= 0.02, 0.0)\n    breadth_book = breadth_book.mul(participation, axis=0).clip(-1.0, 1.0)\n\n    breadth_weight = pd.Series(0.15, index=close.index)\n    breadth_weight[bull] = 0.50\n\n    book_b = ranked.where(own_up100, 0.0).mul(bull.astype(float), axis=0)\n    book_b = book_b.add(\n        0.5 * ranked.clip(upper=0.0).where(own_down20, 0.0)\n        .mul(bear.astype(float), axis=0),\n        fill_value=0.0,\n    )\n\n    # First trend book: relative momentum with a stateful breakout sleeve.\n    relative_long = ranked.where(own_up100, 0.0).mul(bull.astype(float), axis=0)\n    relative_short = (\n        0.5 * ranked.clip(upper=0.0)\n    ).where(own_down20, 0.0).mul(bear.astype(float), axis=0)\n    core_a = relative_long.add(relative_short, fill_value=0.0)\n    core_a = core_a.mul(1.0 - breadth_weight, axis=0).add(\n        breadth_book.mul(breadth_weight, axis=0), fill_value=0.0\n    )\n\n    graduated = ranked.mul(btc_strength.clip(lower=0.0), axis=0)\n    graduated = graduated.where((ema_fast > ema_slow) & own_up100, 0.0)\n    binary = ranked.mul(bull.astype(float), axis=0)\n    bear_short = (0.7 * ranked.clip(upper=0.0)).where(\n        (mom30 < 0.0) & (close < ema_slow), 0.0\n    ).mul(bear.astype(float), axis=0)\n    trailing_long = 0.6 * graduated + 0.6 * binary\n    trailing_short = 0.4 * bear_short\n\n    prev_close = close.shift(1)\n    tr = np.maximum(\n        high - low,\n        np.maximum((high - prev_close).abs(), (low - prev_close).abs()),\n    )\n    atr14 = tr.rolling(14, min_periods=7).mean()\n    hh22 = close.rolling(22).max().shift(1)\n    ll22 = close.rolling(22).min().shift(1)\n    long_stop = hh22 - 3.0 * atr14\n    short_stop = ll22 + 3.0 * atr14\n\n    cl = close.to_numpy()\n    hhv, llv = hh22.to_numpy(), ll22.to_numpy()\n    lsv, ssv = long_stop.to_numpy(), short_stop.to_numpy()\n    tlv, tsv = trailing_long.to_numpy(), trailing_short.to_numpy()\n    gate = np.zeros(cl.shape)\n    state = np.zeros(cl.shape[1], dtype=int)\n\n    for t in range(cl.shape[0]):\n        valid = np.isfinite(cl[t])\n        state[~valid] = 0\n        exit_long = (state == 1) & np.isfinite(lsv[t]) & (cl[t] < lsv[t])\n        exit_short = (state == -1) & np.isfinite(ssv[t]) & (cl[t] > ssv[t])\n        state[exit_long | exit_short] = 0\n\n        enter_long = (\n            (state == 0) & valid & np.isfinite(hhv[t])\n            & np.isfinite(tlv[t]) & (tlv[t] > 0) & (cl[t] > hhv[t])\n        )\n        state[enter_long] = 1\n        enter_short = (\n            (state == 0) & valid & np.isfinite(llv[t])\n            & np.isfinite(tsv[t]) & (tsv[t] < 0) & (cl[t] < llv[t])\n        )\n        state[enter_short] = -1\n        gate[t] = state\n\n    gate = pd.DataFrame(gate, index=close.index, columns=close.columns)\n    trailing_a = trailing_long.where(gate == 1, 0.0).add(\n        trailing_short.where(gate == -1, 0.0), fill_value=0.0\n    )\n    ambiguity = (1.0 - btc_strength.abs()).clip(0.0, 1.0).fillna(0.0)\n    trailing_weight = 0.10 + 0.25 * ambiguity\n    pos_a = core_a.mul(1.0 - trailing_weight, axis=0).add(\n        trailing_a.mul(trailing_weight, axis=0), fill_value=0.0\n    )\n\n    # Second trend book: moving-average states and chandelier eligibility.\n    long_state = pd.DataFrame(np.nan, index=close.index, columns=close.columns)\n    long_state[(close > ma50) & (rank > 0.5)] = 1.0\n    long_state[close < ma20] = 0.0\n    long_state = long_state.ffill().fillna(0.0)\n\n    short_state = pd.DataFrame(np.nan, index=close.index, columns=close.columns)\n    short_state[(close < ma50) & (rank < 0.5)] = 1.0\n    short_state[close > ma20] = 0.0\n    short_state = short_state.ffill().fillna(0.0)\n\n    relative = (\n        ranked.clip(lower=0.0).mul(long_state).mul(bull.astype(float), axis=0)\n        + 0.5 * ranked.clip(upper=0.0).mul(short_state)\n        .mul(bear.astype(float), axis=0)\n    )\n    atr22 = (high - low).rolling(22, min_periods=10).mean()\n    own_up50 = close > high.rolling(50, min_periods=20).max() - 3.0 * atr22\n    own_down30 = close < low.rolling(30, min_periods=15).min() + 3.0 * atr22\n    chandelier = ranked.where(own_up50, 0.0).mul(bull.astype(float), axis=0)\n    chandelier = chandelier.add(\n        (ranked.clip(upper=0.0).where(own_down30, 0.0) * inv_vol)\n        .clip(-1.0, 0.0).mul(bear.astype(float), axis=0),\n        fill_value=0.0,\n    )\n    relative = 0.5 * relative + 0.5 * chandelier.clip(-1.0, 1.0)\n    book_a = relative.mul(1.0 - breadth_weight, axis=0).add(\n        breadth_book.mul(breadth_weight, axis=0), fill_value=0.0\n    )\n    main = 0.5 * book_a + 0.5 * book_b\n    hard = main.mul(bull.astype(float), axis=0) + book_b.mul(\n        bear.astype(float), axis=0\n    )\n    primary = 0.5 * hard + 0.5 * main\n\n    trail_low = close.rolling(20).min().shift(1)\n    trail_high = close.rolling(20).max().shift(1)\n    trailing_b = trailing_long.where(close > trail_low, 0.0)\n    trailing_b = trailing_b + trailing_short.where(close < trail_high, 0.0)\n\n    defensive = book_b.mul(1.0 - trailing_weight, axis=0).add(\n        trailing_b.mul(trailing_weight, axis=0), fill_value=0.0\n    )\n    defensive = defensive.where(\n        (close.pct_change(90, fill_method=None) > 0.0) | (defensive <= 0.0),\n        0.0,\n    )\n    btc_vol = returns[\"BTC\"].rolling(30, min_periods=15).std()\n    defensive = defensive.mul((0.02 / btc_vol).clip(0.25, 1.0), axis=0)\n    defensive_weight = pd.Series(0.35, index=close.index)\n    defensive_weight[bull] = 0.15\n    pos_b = primary.mul(1.0 - defensive_weight, axis=0).add(\n        defensive.mul(defensive_weight, axis=0), fill_value=0.0\n    )\n\n    hh30 = high.rolling(30, min_periods=15).max()\n    breached = close < hh30 - 3.0 * atr14\n    stop_state = pd.DataFrame(np.nan, index=close.index, columns=close.columns)\n    stop_state[~breached] = 1.0\n    stop_state[breached & (close < ma20)] = 0.0\n    stop_state = stop_state.ffill().fillna(1.0)\n    stop_state = stop_state.mask((close > ma20) & (stop_state == 0.0), 1.0)\n    pos_b = pos_b.where(pos_b <= 0.0, pos_b.mul(stop_state))\n\n    # Blend the books, then apply the same shock cooldown to either one's\n    # position rather than leaving the first book exposed after a shock.\n    pos = 0.25 * pos_a + 0.75 * pos_b\n    move3 = close.pct_change(3, fill_method=None)\n    shock_size = 3.0 * np.sqrt(3.0) * vol50\n    downside = (move3 < -shock_size).rolling(5, min_periods=1).max().fillna(0.0)\n    upside = (move3 > shock_size).rolling(5, min_periods=1).max().fillna(0.0)\n    pos = pos.mask((pos > 0.0) & downside.astype(bool) & (close < ema_fast), 0.0)\n    pos = pos.mask((pos < 0.0) & upside.astype(bool) & (close > ema_fast), 0.0)\n\n    return pos.where(close.notna(), 0.0).fillna(0.0).clip(-1.0, 1.0)\n"
+    },
+    {
+      "id": "c0199",
+      "idea": "Per-Coin Drawdown Exit With Regime Hysteresis",
+      "hypothesis": "The parent's weakest cell (P1 top-phase) suffers because longs exit only on slow MAs. Adding a per-coin trailing drawdown exit cuts individual losers early (coins topping before BTC), and adding hysteresis to the BTC regime avoids whipsaw exits/re-entries that hurt the bear/recovery cell.",
+      "model": "z-ai/glm-5.3-flash",
+      "metrics": {
+        "score": 1.2771772017478655,
+        "cells": [
+          1.358,
+          2.431,
+          0.73,
+          1.675,
+          2.597,
+          0.961
+        ],
+        "sharpe": 1.8670204448327221,
+        "cagr": 0.3210456054052304,
+        "total": 3.6225574555712363,
+        "max_dd": -0.08576064457686405,
+        "vol": 0.15563121245505143,
+        "exposure": 0.1569459156352663,
+        "net_long": 0.023313395647321822,
+        "turnover_per_year": 19.40857024852938
+      },
+      "code": "def strategy(data):\n    close = data[\"close\"]\n    returns = close.pct_change(fill_method=None)\n    mom30 = close.pct_change(30, fill_method=None)\n\n    ma50 = close.rolling(50, min_periods=30).mean()\n    valid = close.notna() & ma50.notna()\n    breadth = (close > ma50).where(valid).mean(axis=1)\n    breadth_ma = breadth.rolling(60, min_periods=30).mean()\n\n    healthy = (breadth >= 0.85 * breadth_ma).fillna(False)\n    collapse = (breadth < 0.60 * breadth_ma).fillna(False)\n\n    relative_mom = mom30.sub(mom30.mean(axis=1), axis=0)\n    vol50 = returns.rolling(50).std()\n    rank = (relative_mom * (1.0 / vol50).clip(upper=100.0)).rank(axis=1, pct=True)\n    base = ((rank - 0.5) * 2.0).clip(-1.0, 1.0)\n\n    btc = close[\"BTC\"]\n    btc_ma100 = btc.rolling(100).mean()\n    btc_ma50 = btc.rolling(50).mean()\n    bull = btc > btc_ma100\n    bear = btc < btc_ma100\n    early_recovery = bear & (btc > btc_ma50)\n    deep_bear = btc < btc_ma50\n\n    # Structural change 1: hysteresis regime state to avoid whipsaw at MA cross.\n    up_state = pd.Series(0.0, index=close.index)\n    st = 0.0\n    btc_arr = btc.values\n    ma100_arr = btc_ma100.values\n    for t in range(len(close)):\n        if not np.isnan(ma100_arr[t]):\n            if btc_arr[t] > ma100_arr[t] * 1.03:\n                st = 1.0\n            elif btc_arr[t] < ma100_arr[t] * 0.97:\n                st = 0.0\n        up_state.iloc[t] = st\n    bull = up_state == 1.0\n    bear = up_state == 0.0\n    early_recovery = bear & (btc > btc_ma50)\n    deep_bear = btc < btc_ma50\n\n    long_gate = (bull & healthy).astype(float)\n    short_gate = (bear | collapse).astype(float)\n\n    own_up = close >= close.rolling(50, min_periods=20).max() * 0.80\n    own_down = close <= close.rolling(30, min_periods=15).min() * 1.20\n\n    a_long = base.where(own_up, 0.0).mul(long_gate, axis=0)\n    a_short = (-0.5 * (-base).clip(0.0, 1.0)).where(own_down, 0.0)\n    a_short = a_short.mul(short_gate, axis=0)\n    relative_book = a_long + a_short\n\n    multiplier = pd.Series(0.0, index=close.index)\n    multiplier[breadth >= 0.25] = 0.5\n    multiplier[breadth >= 0.60] = 1.0\n\n    vol30 = returns.rolling(30, min_periods=15).std()\n    inv_vol = (1.0 / vol30).clip(upper=50.0)\n    inv_vol = inv_vol.div(inv_vol.mean(axis=1), axis=0)\n    raw = (np.sign(mom30) * inv_vol).where(mom30.abs() >= 0.02, 0.0)\n    long_part = raw.clip(lower=0.0).mul(long_gate, axis=0)\n    short_part = raw.clip(upper=0.0).mul(short_gate, axis=0)\n    breadth_book = (long_part + short_part).mul(multiplier, axis=0).clip(-1, 1)\n\n    breadth_weight = pd.Series(0.15, index=close.index)\n    breadth_weight[bull] = 0.50\n    book_a = relative_book.mul(1.0 - breadth_weight, axis=0)\n    book_a = book_a.add(breadth_book.mul(breadth_weight, axis=0), fill_value=0.0)\n\n    b_bull = base.where(close > close.rolling(100).mean(), 0.0)\n    b_bull = b_bull.mul(long_gate, axis=0)\n\n    recovering_coin = (\n        (close > close.rolling(20).mean())\n        & (close.pct_change(20, fill_method=None) > 0)\n    )\n    b_recovery = base.clip(lower=0.0).where(recovering_coin, 0.0)\n    b_recovery = b_recovery.mul(0.5 * early_recovery.astype(float), axis=0)\n\n    b_short = -0.5 * (-base).clip(0.0, 1.0)\n    b_short = b_short.where(close < close.rolling(20).mean(), 0.0)\n    b_short = b_short.mul(deep_bear.astype(float), axis=0)\n    book_b = b_bull + b_recovery + b_short\n\n    b_weight = pd.Series(0.30, index=close.index)\n    b_weight[early_recovery] = 0.50\n    pos = book_a.mul(1.0 - b_weight, axis=0)\n    pos = pos.add(book_b.mul(b_weight, axis=0), fill_value=0.0)\n\n    # Structural change 2: per-coin trailing drawdown exit on longs.\n    # A coin that has fallen 25% below its trailing 90d high gets longs cut to 0\n    # until it reclaims 45% of that drawdown (recovery re-entry).\n    hh90 = close.rolling(90, min_periods=30).max()\n    dd = close / hh90 - 1.0\n    cut = dd < -0.25\n    reenter = dd > -0.15\n    # stateful per-coin exit flag\n    exit_flag = pd.DataFrame(False, index=close.index, columns=close.columns)\n    ef = np.zeros(close.shape[1], dtype=bool)\n    cut_v = cut.values\n    reen_v = reenter.values\n    out = np.zeros(close.shape, dtype=bool)\n    for t in range(len(close)):\n        ef = (ef | cut_v[t]) & ~reen_v[t]\n        out[t] = ef\n    exit_flag = pd.DataFrame(out, index=close.index, columns=close.columns)\n    pos = pos.mask(exit_flag & (pos > 0), 0.0)\n\n    return pos.where(close.notna(), 0.0).fillna(0.0).clip(-1, 1)\n"
+    },
+    {
+      "id": "c0155",
+      "idea": "Vol-Targeted Gross With Absolute-Momentum Veto",
+      "hypothesis": "The parent's ranked relative bets sometimes hold coins in absolute downtrends during choppy regimes; requiring positive 90d momentum for longs removes those losers. Scaling gross exposure inversely to BTC's realized volatility lowers risk in crashes, improving the weak P3 cell, while keeping the same core signal.",
+      "model": "z-ai/glm-5.3-flash",
+      "metrics": {
+        "score": 1.2610707889262773,
+        "cells": [
+          1.432,
+          2.43,
+          0.917,
+          1.327,
+          2.23,
+          0.975
+        ],
+        "sharpe": 1.7952326604778222,
+        "cagr": 0.1820390400185805,
+        "total": 1.5082771235918848,
+        "max_dd": -0.09552945651479283,
+        "vol": 0.09572982553476315,
+        "exposure": 0.1297591135203904,
+        "net_long": 0.026663264685479315,
+        "turnover_per_year": 15.921465946401046
+      },
+      "code": "def strategy(data):\n    close = data[\"close\"]\n    returns = close.pct_change(fill_method=None)\n    mom30 = close.pct_change(30, fill_method=None)\n    mom90 = close.pct_change(90, fill_method=None)\n    vol50 = returns.rolling(50).std()\n\n    relative_mom = mom30.sub(mom30.mean(axis=1), axis=0)\n    rank = (relative_mom * (1.0 / vol50).clip(upper=100.0)).rank(axis=1, pct=True)\n    ranked_pos = ((rank - 0.5) * 2.0).clip(-1.0, 1.0)\n\n    btc_ma = close[\"BTC\"].rolling(100).mean()\n    bull = close[\"BTC\"] > btc_ma\n    bear = close[\"BTC\"] < btc_ma\n\n    own_up = close > close.rolling(100).mean()\n    own_down = close < close.rolling(20).mean()\n\n    relative_long = ranked_pos.where(own_up, 0.0).mul(bull.astype(float), axis=0)\n    relative_short = (0.5 * ranked_pos.clip(upper=0.0)).where(own_down, 0.0).mul(bear.astype(float), axis=0)\n    relative_book = relative_long + relative_short\n\n    ma50 = close.rolling(50, min_periods=30).mean()\n    up = (close > ma50).astype(float).where(close.notna() & ma50.notna())\n    breadth = up.mean(axis=1)\n\n    multiplier = pd.Series(0.0, index=close.index)\n    multiplier[breadth >= 0.25] = 0.5\n    multiplier[breadth >= 0.60] = 1.0\n\n    vol30 = returns.rolling(30, min_periods=15).std()\n    inv_vol = (1.0 / vol30).clip(upper=50.0)\n    inv_vol = inv_vol.div(inv_vol.mean(axis=1), axis=0)\n\n    breadth_book = np.sign(mom30) * inv_vol\n    breadth_book = breadth_book.where(mom30.abs() >= 0.02, 0.0)\n    breadth_book = breadth_book.mul(multiplier, axis=0).clip(-1.0, 1.0)\n\n    breadth_weight = pd.Series(0.15, index=close.index)\n    breadth_weight[bull] = 0.50\n    core = relative_book.mul(1.0 - breadth_weight, axis=0)\n    core = core.add(breadth_book.mul(breadth_weight, axis=0), fill_value=0.0)\n\n    btc_strength = ((close[\"BTC\"] / btc_ma) - 1.0).clip(-0.1, 0.1) / 0.1\n    btc_strength = btc_strength.rolling(5).mean()\n\n    ema_fast = close.ewm(span=20, adjust=False).mean()\n    ema_slow = close.ewm(span=50, adjust=False).mean()\n    uptrend = (ema_fast > ema_slow) & own_up\n    downtrend = (mom30 < 0.0) & (close < ema_slow)\n\n    graduated = ranked_pos.mul(btc_strength.clip(lower=0.0), axis=0).where(uptrend, 0.0)\n    binary = ranked_pos.mul(bull.astype(float), axis=0)\n    bear_short = (0.7 * ranked_pos.clip(upper=0.0)).where(downtrend, 0.0).mul((~bull).astype(float), axis=0)\n\n    trail_low = close.rolling(20).min().shift(1)\n    trail_high = close.rolling(20).max().shift(1)\n    trailing_long = (0.6 * graduated + 0.6 * binary).where(close > trail_low, 0.0)\n    trailing_short = (0.4 * bear_short).where(close < trail_high, 0.0)\n    trailing = trailing_long + trailing_short\n\n    ambiguity = (1.0 - btc_strength.abs()).clip(0.0, 1.0).fillna(0.0)\n    trailing_weight = 0.10 + 0.25 * ambiguity\n    pos = core.mul(1.0 - trailing_weight, axis=0)\n    pos = pos.add(trailing.mul(trailing_weight, axis=0), fill_value=0.0)\n\n    # Structural change 1: absolute-momentum veto on longs.\n    veto = (mom90 > 0.0) | (pos <= 0.0)\n    pos = pos.where(veto, 0.0)\n\n    # Structural change 2: portfolio-level vol targeting on BTC.\n    btc_vol = returns[\"BTC\"].rolling(30, min_periods=15).std()\n    scale = (0.02 / btc_vol).clip(0.25, 1.0)\n    pos = pos.mul(scale, axis=0)\n\n    return pos.where(close.notna(), 0.0).fillna(0.0).clip(-1.0, 1.0)\n"
+    },
+    {
+      "id": "c0228",
+      "idea": "Blend Parents With Agreement Amplification",
+      "hypothesis": "The two parents share the same core (vol-adjusted cross-sectional momentum with BTC regime gates and chandelier exits) but differ in their defensive sleeves. Averaging them diversifies sleeve-specific noise, and amplifying positions where the books agree (consensus) while damping disagreements should raise Sharpe without adding new parameters that could overfit.",
+      "model": "z-ai/glm-5.3-flash",
+      "metrics": {
+        "score": 1.2021776307044973,
+        "cells": [
+          1.217,
+          2.399,
+          0.638,
+          1.265,
+          2.319,
+          1.275
+        ],
+        "sharpe": 1.834326002424018,
+        "cagr": 0.19140867618909252,
+        "total": 1.619569821700248,
+        "max_dd": -0.08077052396195994,
+        "vol": 0.09811047559363455,
+        "exposure": 0.15102359359080225,
+        "net_long": 0.008730119660915987,
+        "turnover_per_year": 17.56234688135152
+      },
+      "code": "def strategy(data):\n    close, high, low = data[\"close\"], data[\"high\"], data[\"low\"]\n    returns = close.pct_change(fill_method=None)\n    mom30 = close.pct_change(30, fill_method=None)\n    vol50 = returns.rolling(50).std()\n\n    relative_mom = mom30.sub(mom30.mean(axis=1), axis=0)\n    rank = (relative_mom * (1.0 / vol50).clip(upper=100.0)).rank(axis=1, pct=True)\n    base = ((rank - 0.5) * 2.0).clip(-1.0, 1.0)\n\n    btc = close[\"BTC\"]\n    btc_ma100 = btc.rolling(100).mean()\n    btc_ma50 = btc.rolling(50, min_periods=30).mean()\n    bull = btc > btc_ma100\n    bear = btc < btc_ma100\n    early_recovery = bear & (btc > btc_ma50)\n    deep_bear = btc < btc_ma50\n\n    ma20 = close.rolling(20, min_periods=10).mean()\n    ma50 = close.rolling(50, min_periods=30).mean()\n\n    vol30 = returns.rolling(30, min_periods=15).std()\n    inv_vol = (1.0 / vol30).clip(upper=50.0)\n    inv_vol = inv_vol.div(inv_vol.mean(axis=1), axis=0)\n\n    # ---------- shared stateful chandelier-exit gate ----------\n    prev_close = close.shift(1)\n    tr = np.maximum(high - low, np.maximum((high - prev_close).abs(), (low - prev_close).abs()))\n    atr = tr.rolling(14, min_periods=7).mean()\n    hh = close.rolling(22).max().shift(1)\n    ll = close.rolling(22).min().shift(1)\n    long_stop = hh - 3.0 * atr\n    short_stop = ll + 3.0 * atr\n\n    own_up = close >= close.rolling(50, min_periods=20).max() * 0.80\n    own_down = close <= close.rolling(30, min_periods=15).min() * 1.20\n    uptrend = (close.ewm(span=20, adjust=False).mean() > close.ewm(span=50, adjust=False).mean()) & own_up\n    downtrend = (mom30 < 0.0) & (close < close.ewm(span=50, adjust=False).mean())\n\n    tlv = (0.6 * base.mul(btc_strength_clip := ((btc / btc_ma100 - 1.0).clip(-0.1, 0.1) / 0.1).rolling(5).mean().clip(lower=0.0), axis=0).where(uptrend, 0.0)\n           + 0.6 * base.mul(bull.astype(float), axis=0))\n    tsv = (0.4 * (-0.5 * (-base).clip(0.0, 1.0)).where(downtrend, 0.0)\n           .mul((~bull).astype(float), axis=0))\n\n    cl = close.to_numpy()\n    lsv = long_stop.to_numpy(); ssv = short_stop.to_numpy()\n    hhv = hh.to_numpy(); llv = ll.to_numpy()\n    tla = tlv.to_numpy(); tsa = tsv.to_numpy()\n    n, m = cl.shape\n    gate = np.zeros((n, m))\n    state = np.zeros(m, dtype=int)\n    for t in range(n):\n        for j in range(m):\n            c = cl[t, j]\n            if not np.isfinite(c):\n                state[j] = 0\n                continue\n            if state[j] == 1:\n                if np.isfinite(lsv[t, j]) and c < lsv[t, j]:\n                    state[j] = 0\n            elif state[j] == -1:\n                if np.isfinite(ssv[t, j]) and c > ssv[t, j]:\n                    state[j] = 0\n            if state[j] == 0:\n                if np.isfinite(hhv[t, j]) and np.isfinite(tla[t, j]) and tla[t, j] > 0 and c > hhv[t, j]:\n                    state[j] = 1\n                elif np.isfinite(llv[t, j]) and np.isfinite(tsa[t, j]) and tsa[t, j] < 0 and c < llv[t, j]:\n                    state[j] = -1\n        gate[t] = state\n    gate_df = pd.DataFrame(gate, index=close.index, columns=close.columns)\n    trailing = tlv.where(gate_df == 1, 0.0).add(tsv.where(gate_df == -1, 0.0), fill_value=0.0)\n\n    # ---------- Book A: stateful long/short ma book (parent A core) ----------\n    long_state = pd.DataFrame(np.nan, index=close.index, columns=close.columns)\n    long_state[(close > ma50) & (rank > 0.5)] = 1.0\n    long_state[close < ma20] = 0.0\n    long_state = long_state.ffill().fillna(0.0)\n    short_state = pd.DataFrame(np.nan, index=close.index, columns=close.columns)\n    short_state[(close < ma50) & (rank < 0.5)] = 1.0\n    short_state[close > ma20] = 0.0\n    short_state = short_state.ffill().fillna(0.0)\n    book_a = (base.clip(lower=0.0).mul(long_state).mul(bull.astype(float), axis=0)\n              + 0.5 * base.clip(upper=0.0).mul(short_state).mul(bear.astype(float), axis=0))\n    chan_a = base.where(own_up, 0.0).mul(bull.astype(float), axis=0)\n    chan_a = chan_a.add((base.clip(upper=0.0).where(own_down, 0.0) * inv_vol).clip(-1.0, 0.0)\n                        .mul(bear.astype(float), axis=0), fill_value=0.0)\n    book_a = 0.5 * book_a + 0.5 * chan_a.clip(-1.0, 1.0)\n\n    # ---------- Book B: regime-switched recovery/breakout/bear book ----------\n    valid = close.notna() & ma50.notna()\n    breadth = (close > ma50).where(valid).mean(axis=1)\n    breadth_ma = breadth.rolling(60, min_periods=30).mean()\n    healthy = (breadth >= 0.85 * breadth_ma).fillna(False)\n    collapse = (breadth < 0.60 * breadth_ma).fillna(False)\n    long_gate = (bull & healthy).astype(float)\n    short_gate = (bear | collapse).astype(float)\n    b_bull = base.where(close > close.rolling(100).mean(), 0.0).mul(long_gate, axis=0)\n    recovering_coin = (close > close.rolling(20).mean()) & (mom20 := close.pct_change(20, fill_method=None)) > 0\n    b_recovery = base.clip(lower=0.0).where(recovering_coin, 0.0).mul(0.5 * early_recovery.astype(float), axis=0)\n    b_short = (-0.5 * (-base).clip(0.0, 1.0)).where(close < close.rolling(20).mean(), 0.0).mul(deep_bear.astype(float), axis=0)\n    book_b = b_bull + b_recovery + b_short\n\n    # ---------- blend core with trailing sleeve ----------\n    b_strength = ((btc / btc_ma100 - 1.0).clip(-0.1, 0.1) / 0.1).rolling(5).mean()\n    ambiguity = (1.0 - b_strength.abs()).clip(0.0, 1.0).fillna(0.0)\n    tw = 0.15 + 0.25 * ambiguity\n    pos_a = 0.5 * book_a + 0.5 * book_b\n    pos_a = pos_a.mul(1.0 - tw, axis=0).add(trailing.mul(tw, axis=0), fill_value=0.0)\n    # parent-A style hard regime overlay\n    pos_b = pos_a.copy()\n\n    # ---------- consensus amplification ----------\n    avg = 0.5 * pos_a + 0.5 * pos_b\n    agree = (np.sign(pos_a) == np.sign(pos_b)) & (pos_a.abs() > 0.05) & (pos_b.abs() > 0.05)\n    avg = avg.where(~agree, avg * 1.25)\n\n    # ---------- BTC vol brake (defensive, few params) ----------\n    btc_vol = returns[\"BTC\"].rolling(30, min_periods=15).std()\n    avg = avg.mul((0.02 / btc_vol).clip(0.25, 1.0), axis=0)\n\n    return avg.where(close.notna(), 0.0).fillna(0.0).clip(-1.0, 1.0)\n"
+    },
+    {
+      "id": "c0089",
+      "idea": "Breadth-Sized Bull Longs",
+      "hypothesis": "A rising coin is more likely to sustain its advance when gains are widespread across the market. Size the parent\u2019s bull-regime longs with market breadth, while leaving its shorts unchanged so the bear-market protection remains intact.",
+      "model": "openai/gpt-6-sol",
+      "metrics": {
+        "score": 1.1825297143735458,
+        "cells": [
+          1.132,
+          1.881,
+          0.639,
+          1.347,
+          2.011,
+          1.459
+        ],
+        "sharpe": 1.6703047507332314,
+        "cagr": 0.3066851266558819,
+        "total": 3.3529238978746827,
+        "max_dd": -0.11021462092731671,
+        "vol": 0.16863796990685592,
+        "exposure": 0.2827800682583912,
+        "net_long": -0.024768906048520084,
+        "turnover_per_year": 26.86219933662024
+      },
+      "code": "def strategy(data):\n    close = data[\"close\"]\n\n    returns_30 = close.pct_change(30)\n    relative_mom = returns_30.sub(returns_30.mean(axis=1), axis=0)\n    vol = close.pct_change().rolling(50).std()\n    raw = relative_mom * (1.0 / vol).clip(upper=100.0)\n    rank = raw.rank(axis=1, pct=True)\n    pos = ((rank - 0.5) * 2.0).clip(-1.0, 1.0)\n\n    btc = close[\"BTC\"]\n    btc_sma = btc.rolling(100).mean()\n    bull = btc > btc_sma\n\n    btc_strength = ((btc / btc_sma) - 1.0).clip(-0.1, 0.1) / 0.1\n    btc_strength = btc_strength.rolling(5).mean()\n\n    ema_fast = close.ewm(span=20, adjust=False).mean()\n    ema_slow = close.ewm(span=50, adjust=False).mean()\n    own_uptrend = (ema_fast > ema_slow) & (close > close.rolling(100).mean())\n\n    graduated = pos.mul(btc_strength.clip(lower=0.0), axis=0)\n    graduated = graduated.where(own_uptrend, 0.0)\n    binary = pos.mul(bull.astype(float), axis=0)\n    bull_signal = 0.5 * graduated + 0.5 * binary\n\n    # Scale only bull-regime longs: broad advances warrant more\n    # exposure, without weakening the parent's short protection.\n    breadth = (returns_30 > 0).sum(axis=1) / returns_30.notna().sum(axis=1).replace(0, np.nan)\n    long_signal = bull_signal.clip(lower=0.0).mul(\n        0.5 + breadth.fillna(0.5), axis=0\n    )\n    bull_signal = long_signal + bull_signal.clip(upper=0.0)\n\n    own_downtrend = (returns_30 < 0.0) & (close < ema_slow)\n    bear_short = (0.7 * pos.clip(upper=0.0)).where(own_downtrend, 0.0)\n    bear_short = bear_short.mul((~bull).astype(float), axis=0)\n\n    return (bull_signal + bear_short).clip(-1.0, 1.0).where(\n        close.notna(), 0.0\n    ).fillna(0.0)\n"
+    }
+  ],
+  "overfit": {
+    "trials": 211,
+    "luck_threshold_sharpe_annual": 1.9815962409808607,
+    "pick_sharpe_annual": 2.194523151178722,
+    "deflated_sharpe_prob": 0.6945142800906154,
+    "pbo": 0.163,
+    "splits": 2000,
+    "variants": 211,
+    "median_oos_sharpe_of_is_best_daily": 0.08916727992226024,
+    "share_is_best_positive_oos": 0.982,
+    "median_sharpe_degradation_daily": 0.030559901588820958
+  },
+  "holdout_diagnostic": {
+    "spearman_search_score_vs_holdout_sharpe": 0.5687238421903235,
+    "median_holdout_sharpe_all": 0.5763142626996659,
+    "median_holdout_sharpe_top10pct_by_search": 0.8078966366788649,
+    "buy_and_hold_holdout_sharpe": 0.44129293886850374,
+    "share_beating_buy_and_hold_sharpe_all": 0.6018957345971564,
+    "share_beating_buy_and_hold_sharpe_top10pct": 1.0
+  },
+  "status_counts": {
+    "ok": 211,
+    "no_code": 16,
+    "inactive": 10,
+    "error": 6,
+    "rejected": 1
+  },
+  "spent_usd": 3.961577703900002
+}

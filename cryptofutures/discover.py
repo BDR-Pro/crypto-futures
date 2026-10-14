@@ -732,7 +732,7 @@ def finalize(out_dir: Path, spot: Panel, futures: Panel | None, top_k: int = 5, 
     bh_sharpe = holdout_eval(seeds["buy_and_hold"]["code"], spot)["sharpe"] if "buy_and_hold" in seeds else float("nan")
     v = allh.dropna(subset=["holdout_sharpe"])
     top = v.nlargest(max(len(v) // 10, 1), "search_score")
-    diag = {"spearman_search_score_vs_holdout_sharpe": float(v.search_score.corr(v.holdout_sharpe, method="spearman")),
+    diag = {"spearman_search_score_vs_holdout_sharpe": float(v.search_score.rank().corr(v.holdout_sharpe.rank())),
             "median_holdout_sharpe_all": float(v.holdout_sharpe.median()),
             "median_holdout_sharpe_top10pct_by_search": float(top.holdout_sharpe.median()),
             "buy_and_hold_holdout_sharpe": float(bh_sharpe),

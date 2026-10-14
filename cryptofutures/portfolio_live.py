@@ -36,7 +36,8 @@ def perp_symbol(symbol: str) -> str:
 class PortfolioPaperTrader:
     def __init__(self, code: str, symbols: list[str], exchange: str = "binance", state_path: str = "results/live_disc/state.json",
                  log_path: str = "results/live_disc/rebalances.csv", initial_equity: float = 10_000.0,
-                 history_days: int = 800, funding: bool = True, poll_seconds: int = 60, name: str = "discovered"):
+                 history_days: int = 800, funding: bool = True, poll_seconds: int = 60, name: str = "discovered",
+                 scale: float = 1.0):
         import ccxt  # lazily: only live trading needs it
         opts: dict = {"enableRateLimit": True}
         proxy = os.environ.get("HTTPS_PROXY") or os.environ.get("https_proxy")
@@ -48,6 +49,7 @@ class PortfolioPaperTrader:
         self.alias = anonymise([s.removeprefix("1000") for s in symbols])
         self.symbols = [s.removeprefix("1000") for s in symbols]
         self.history_days, self.poll = history_days, poll_seconds
+        self.scale = scale              # >1 puts idle cash to work; gross exposure stays capped at 100%
         self.state_path, self.log_path = Path(state_path), Path(log_path)
         self.cash, self.units = initial_equity, {}
         self.last_rebalance: str | None = None
@@ -124,7 +126,10 @@ class PortfolioPaperTrader:
         pos = payload[0][-1]
         last_close = data["close"].iloc[-1]
         alive = last_close.notna().to_numpy()
-        weights = np.where(alive, pos, 0.0) / max(int(alive.sum()), 1)
+        weights = np.where(alive, pos, 0.0) / max(int(alive.sum()), 1) * self.scale
+        gross = np.abs(weights).sum()
+        if gross > 1.0:
+            weights /= gross
         prices = self.prices()
         eq = self.equity(prices)
         by_alias = {a: s for s, a in self.alias.items()}

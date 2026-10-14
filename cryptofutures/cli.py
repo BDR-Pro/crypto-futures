@@ -130,6 +130,7 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--exchange", default="binance", help="ccxt spot exchange id: binance, okx, bybit, ...")
     sp.add_argument("--state-dir", default="results/live_disc")
     sp.add_argument("--no-funding", action="store_true")
+    sp.add_argument("--scale", type=float, default=1.0, help="multiply positions (gross exposure capped at 100%%)")
     sp.add_argument("--poll", type=int, default=60)
     sp.add_argument("--spot-config", default="results/sample/long-history/spot_43coins_2017_2026.toml")
 
@@ -277,7 +278,7 @@ def main(argv: list[str] | None = None) -> None:
         state = Path(a.state_dir)
         PortfolioPaperTrader(code, load_config(a.spot_config).data.symbols, exchange=a.exchange,
                              state_path=str(state / "state.json"), log_path=str(state / "rebalances.csv"),
-                             funding=not a.no_funding, poll_seconds=a.poll, name=name).run()
+                             funding=not a.no_funding, poll_seconds=a.poll, name=name, scale=a.scale).run()
 
     elif a.cmd == "history":
         from .benchmark import format_table, load_history

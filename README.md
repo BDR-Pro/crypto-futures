@@ -208,6 +208,24 @@ cryptofutures -c results/sample/long-history/spot_43coins_2017_2026.toml overfit
 symmetric cross-validation) and the deflated Sharpe ratio of the best variant. Daily candles
 (`base_interval = "1d"`) make a 9-year, 43-coin backtest take seconds.
 
+## Strategy discovery (LLMs write strategies, a locked holdout judges them)
+
+`cryptofutures discover` uses cheap tokens and compute without trusting them. Models write candidate strategies
+as Python, and a fast evaluator scores them on 2018-01 → 2023-06 only. Every candidate is re-run on truncated
+history and rejected if it peeked at the future; coins are anonymised so code cannot hard-code famous crashes.
+The best search score is the pick, fixed in advance. `cryptofutures discover-report` runs it once on
+2023-07 → today and reports the deflated Sharpe and PBO over all trials.
+
+In the first run, 244 candidates for $3.96 roughly doubled the 43-coin basket's risk-adjusted return on unseen
+data (Sharpe 0.86 vs 0.44) with a 15% drawdown instead of 76%. They did not beat holding BTC's +169%. The search
+score predicted holdout Sharpe (rank correlation 0.57). Details: `results/sample/discovery/README.md`.
+
+```bash
+cryptofutures discover --out results/discovery_main --budget 25        # search (OpenRouter key needed)
+cryptofutures discover-report --out results/discovery_main             # one-time holdout
+cryptofutures paper-portfolio --code results/sample/discovery/finalists/c0155.py --scale 2   # live paper, daily rebalance
+```
+
 ## Randomized robustness tests and the champion
 
 A single backtest is one path. `robustness` re-runs a strategy's cached decisions many times to separate skill from luck:
