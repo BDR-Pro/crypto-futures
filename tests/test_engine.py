@@ -331,3 +331,15 @@ def test_long_biased_trend_rules_only_emit_their_actions():
     times = store.decision_times()
     assert set(TrendFilterLong().decide("X", store, times).action) <= {"LONG", "FLAT"}
     assert set(TrendLongShort().decide("X", store, times).action) <= {"LONG", "SHORT"}
+
+
+def test_trend_hybrid_is_long_unless_strong_downtrend():
+    from cryptofutures.features import FeatureStore
+    from cryptofutures.strategies.baselines import TrendHybrid
+    up = candles(list(100 * np.exp(np.linspace(0, 1.0, 24 * 400))), spread=0.002)
+    down = candles(list(100 * np.exp(np.linspace(0, -1.5, 24 * 400))), spread=0.002)
+    for c, expect in ((up, "LONG"), (down, "SHORT")):
+        store = FeatureStore(c, 24)
+        d = TrendHybrid().decide("X", store, store.decision_times()[-30:])
+        assert (d.action == expect).all()
+    assert TrendHybrid.use_stops is False

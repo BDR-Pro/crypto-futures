@@ -44,7 +44,7 @@ Its licence is non-commercial; for commercial use, the Apache-2.0 Jev-Style 2B (
 | **Model input** | Trend, momentum, volatility, range, volume and taker flow on the decision timeframe; daily trend context; funding rate; the last 12 closes. Only closed candles go in, so the model never sees the future. |
 | **Risk layer** | Caps leverage. Clamps SL to a min/max. Keeps the SL inside the liquidation price. Filters by confidence. Sizes by margin or by risk. |
 | **Paper exchange** | Isolated margin. 0.05% taker fee and 2 bps slippage. 8h funding from real history. SL, TP and liquidation are checked on hourly candles. If SL and TP hit in the same candle, the SL is assumed to fill first. Gaps fill at the open. |
-| **Baselines** | `buy_and_hold`, `ema_trend`, `donchian_breakout`, `rsi_reversion`, `trend_filter_long`, `trend_long_short`, `random`, `flat` |
+| **Baselines** | `buy_and_hold`, `ema_trend`, `donchian_breakout`, `rsi_reversion`, `trend_filter_long`, `trend_long_short`, `trend_hybrid`, `random`, `flat` |
 | **Metrics** | Return, CAGR, Sharpe, Sortino, max drawdown, Calmar, win rate, profit factor, liquidations, fees, funding. Also directional accuracy (forecasting skill without the risk layer) and accuracy on high-confidence calls. |
 
 ## Quick start (all local)
@@ -142,6 +142,9 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
+- **Survivorship check:** on a wider 16-coin set including coins that later dropped out of the top-10, buy-and-hold
+  −10.2%, ema_trend +44.5%, trend_hybrid +51.6% (1x). ema_trend beat buy-and-hold in 75% of random 90-day windows
+  and is now the champion for that setup. See `results/sample/survivorship-check/`.
 - **What beats buy-and-hold:** over Sep 2024 → Oct 2026, a daily EMA trend rule at 1x that lets winners run
   (no take-profit, ATR stop) made +90.5% vs buy-and-hold +9.7%, Sharpe 1.11 vs 0.39, max drawdown −28% vs −63%.
   Timing p = 0.01; walk-forward picks the same settings without hindsight. Ready-made config:
@@ -166,6 +169,16 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 So far no small model shows an edge. The harness is there to find out whether bigger models
 (JEV-9B/27B, gpt-oss-20b, Qwen3-32B on a GPU) do. See `results/sample/README.md` for details.
+
+## Quarter-by-quarter view
+
+```bash
+cryptofutures -c results/sample/beats-buy-and-hold/ema_trend_ride.toml quarters \
+  --strategies buy_and_hold,ema_trend,trend_hybrid --start 2024-09-01 --end 2026-10-11
+```
+
+One total over one window hides regime dependence; this prints every quarter (bold = beat buy-and-hold).
+With more coins than `max_open_positions` (default 10), raise it and lower `margin_per_trade`, or the extra coins never trade.
 
 ## Leverage experiments
 

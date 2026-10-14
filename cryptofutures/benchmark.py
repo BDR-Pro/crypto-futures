@@ -174,3 +174,38 @@ def _plot_leverage(df: pd.DataFrame, path: Path) -> None:
     fig.tight_layout()
     fig.savefig(path, dpi=110)
     plt.close(fig)
+
+
+def quarterly_report(cfg: Config, strategies: list[str], start: str, end: str, freq: str = "QE") -> pd.DataFrame:
+    """Return per calendar quarter (or any pandas period) for each strategy, plus whole-period stats."""
+    from .metrics import compute_metrics
+    wb = Workbench(cfg)
+    rows = {}
+    for name in strategies:
+        strat = make_strategy(name, cfg)
+        res, m = wb.run(strat, start=start, end=end)
+        eq = res.equity.resample("1D").last().dropna()
+        q = eq.resample(freq).last()
+        prev = pd.concat([pd.Series([cfg.exchange.initial_equity], index=[eq.index[0] - pd.Timedelta(days=1)]), q])
+        rets = (q / prev.shift(1).iloc[1:].values - 1)
+        rets.index = [f"{d.year}Q{(d.month - 1) // 3 + 1}" for d in rets.index]
+        rows[strat.name] = {**{k: float(v) for k, v in rets.items()}, "TOTAL": m["total_return"],
+                            "Sharpe": m["sharpe"], "max DD": m["max_drawdown"]}
+    return pd.DataFrame(rows)
+
+
+def format_quarterly(df: pd.DataFrame, benchmark: str = "buy_and_hold") -> str:
+    cols = list(df.columns)
+    lines = ["| period | " + " | ".join(cols) + " |", "|" + "---|" * (len(cols) + 1)]
+    for idx, row in df.iterrows():
+        cells = []
+        for c in cols:
+            v = row[c]
+            if idx == "Sharpe":
+                cells.append(f"{v:.2f}")
+            else:
+                beat = (idx not in ("max DD",) and c != benchmark and benchmark in df.columns
+                        and v > row[benchmark])
+                cells.append(f"{'**' if beat else ''}{v * 100:+.1f}%{'**' if beat else ''}")
+        lines.append(f"| {idx} | " + " | ".join(cells) + " |")
+    return "\n".join(lines)

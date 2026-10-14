@@ -231,5 +231,92 @@
     },
     "robust_score": 0.0,
     "crowned": "2026-10-13T19:30:48.494444+00:00"
+  },
+  "2024-09-01..2026-10-11|24h|1000SHIBUSDT,ADAUSDT,AVAXUSDT,BCHUSDT,BNBUSDT,BTCUSDT,DOGEUSDT,DOTUSDT,ETHUSDT,LINKUSDT,LTCUSDT,MATICPOLUSDT,SOLUSDT,TONUSDT,TRXUSDT,XRPUSDT": {
+    "strategy": "ema_trend",
+    "spec": "ema_trend",
+    "period": [
+      "2024-09-01",
+      "2026-10-11"
+    ],
+    "symbols": [
+      "BTCUSDT",
+      "ETHUSDT",
+      "XRPUSDT",
+      "BNBUSDT",
+      "SOLUSDT",
+      "DOGEUSDT",
+      "TRXUSDT",
+      "ADAUSDT",
+      "LINKUSDT",
+      "AVAXUSDT",
+      "DOTUSDT",
+      "LTCUSDT",
+      "BCHUSDT",
+      "TONUSDT",
+      "1000SHIBUSDT",
+      "MATICPOLUSDT"
+    ],
+    "risk": {
+      "decision_hours": 24,
+      "max_leverage": 10,
+      "default_leverage": 3,
+      "sizing": "margin",
+      "margin_per_trade": 0.05,
+      "risk_per_trade": 0.01,
+      "sl_source": "atr",
+      "atr_sl_mult": 1.5,
+      "reward_risk": 100.0,
+      "min_sl_pct": 0.004,
+      "max_sl_pct": 0.25,
+      "min_confidence": 0.0,
+      "flat_closes": true,
+      "max_open_positions": 16,
+      "leverage_override": 1,
+      "liq_guard": "reduce_leverage"
+    },
+    "seed": 21,
+    "metrics": {
+      "total_return": 0.4450513287200719,
+      "sharpe": 0.7104543228179728,
+      "max_drawdown": -0.3048985609521785,
+      "trades": 438,
+      "win_rate": 0.319634703196347,
+      "avg_leverage": 1.0,
+      "directional_accuracy": 0.5163344407530454
+    },
+    "buy_and_hold_return": -0.10235407547217112,
+    "timing_permutation": {
+      "observed": 0.4450513287200719,
+      "null_mean": -0.1954293516790289,
+      "null_p05": -0.3683851219535463,
+      "null_p95": -0.06615849232188997,
+      "p_value": 0.01639344262295082
+    },
+    "trade_bootstrap": {
+      "n_trades": 438,
+      "return_p05": 0.10024659020627712,
+      "return_p50": 0.4323507390581795,
+      "return_p95": 0.8426975212184554,
+      "prob_positive": 0.98
+    },
+    "random_windows": {
+      "n": 40,
+      "window_days": 90,
+      "coins_per_window": 10,
+      "beat_buy_hold_share": 0.75,
+      "excess_median": 0.08525403811912996,
+      "excess_p10": -0.1785112925556677,
+      "excess_p90": 0.26385157159382494
+    },
+    "risk_perturbation": {
+      "n": 10,
+      "return_median": 0.23909772752374336,
+      "return_p10": -0.02868967354898071,
+      "return_p90": 0.6616002126914863,
+      "positive_share": 0.7
+    },
+    "robust_score": 0.08525403811912996,
+    "crowned": "2026-10-14T01:13:32.544554+00:00"
   }
 }
