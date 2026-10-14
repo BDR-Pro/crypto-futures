@@ -10,6 +10,10 @@ import pandas as pd
 
 from .config import load_config
 
+# Strong coders of different families: diversity of ideas matters more than any single model.
+DISCOVERY_MODELS = ["anthropic/claude-sonnet-5.5", "openai/gpt-6-sol", "google/gemini-3.8-flash",
+                    "deepseek/deepseek-v4.1-flash", "qwen/qwen3.8-flash", "z-ai/glm-5.3-flash"]
+
 
 def _overrides(a: argparse.Namespace) -> dict:
     o: dict = {}
@@ -103,6 +107,32 @@ def main(argv: list[str] | None = None) -> None:
     sp.add_argument("--splits", type=int, default=2000)
     sp.add_argument("--trials", type=int, default=0, help="trials to deflate for (default: number of variants)")
     sp.add_argument("--tag", default="")
+
+    sp = sub.add_parser("discover", help="LLM-driven search for new strategies (search 2018-2023H1, locked holdout)")
+    sp.add_argument("--out", help="run folder; an existing one is resumed (default: results/discovery_<time>)")
+    sp.add_argument("--models", default=",".join(DISCOVERY_MODELS), help="OpenRouter model ids, comma separated")
+    sp.add_argument("--candidates", type=int, default=400)
+    sp.add_argument("--budget", type=float, default=25.0, help="stop when this many USD have been spent")
+    sp.add_argument("--concurrency", type=int, default=6)
+    sp.add_argument("--eval-workers", type=int, default=3)
+    sp.add_argument("--reasoning", default="medium", help="reasoning effort for models that support it ('' = off)")
+    sp.add_argument("--spot-config", default="results/sample/long-history/spot_43coins_2017_2026.toml")
+
+    sp = sub.add_parser("discover-report", help="overfitting stats and the one-time holdout for a discovery run")
+    sp.add_argument("--out", required=True)
+    sp.add_argument("--top", type=int, default=5)
+    sp.add_argument("--spot-config", default="results/sample/long-history/spot_43coins_2017_2026.toml")
+    sp.add_argument("--futures-config", default="results/sample/long-history/futures_coins_2020_2026.toml")
+
+    sp = sub.add_parser("paper-portfolio", help="live paper trading of a discovered strategy (daily rebalance)")
+    sp.add_argument("--candidate", help="<discovery run folder>:<candidate id>, e.g. results/discovery_main:c0123")
+    sp.add_argument("--code", help="or a .py file defining strategy(data)")
+    sp.add_argument("--exchange", default="binance", help="ccxt spot exchange id: binance, okx, bybit, ...")
+    sp.add_argument("--state-dir", default="results/live_disc")
+    sp.add_argument("--no-funding", action="store_true")
+    sp.add_argument("--scale", type=float, default=1.0, help="multiply positions (gross exposure capped at 100%%)")
+    sp.add_argument("--poll", type=int, default=60)
+    sp.add_argument("--spot-config", default="results/sample/long-history/spot_43coins_2017_2026.toml")
 
     sp = sub.add_parser("history", help="show every benchmark run so far, best first")
     sp.add_argument("--rank-by", default="sharpe")
@@ -211,6 +241,44 @@ def main(argv: list[str] | None = None) -> None:
         print("...\n" + summary.tail(4).to_string(index=False))
         print(json.dumps(rep, indent=2, default=float))
         print(f"results: {out}/")
+
+    elif a.cmd in ("discover", "discover-report"):
+        from pathlib import Path
+
+        from .discover import Discovery, default_out_dir, finalize, load_panel
+
+        def panel(path):
+            c = load_config(path)
+            return load_panel(c.data.data_dir, c.data.symbols, c.data.market)
+        if a.cmd == "discover":
+            out = Path(a.out) if a.out else default_out_dir()
+            d = Discovery(panel(a.spot_config), out, [m.strip() for m in a.models.split(",")], budget_usd=a.budget,
+                          llm_concurrency=a.concurrency, eval_workers=a.eval_workers, reasoning=a.reasoning)
+            d.run(a.candidates)
+            print(f"{len(d.records)} candidates, ${d.spent:.2f} spent. Best on the search window:")
+            for r in d.ok()[:10]:
+                print(f"  {r['id']} {r['metrics']['score']:+.3f} {r['idea']} ({r['model']})")
+            print(f"results: {out}/  - next: cryptofutures discover-report --out {out}")
+        else:
+            print(finalize(Path(a.out), panel(a.spot_config), panel(a.futures_config), top_k=a.top))
+
+    elif a.cmd == "paper-portfolio":
+        from pathlib import Path
+
+        from .portfolio_live import PortfolioPaperTrader
+        if a.candidate:
+            run, cid = a.candidate.rsplit(":", 1)
+            rec = next(json.loads(x) for x in Path(run, "candidates.jsonl").read_text().splitlines()
+                       if json.loads(x)["id"] == cid)
+            code, name = rec["code"], f"{cid} {rec['idea']}"
+        elif a.code:
+            code, name = Path(a.code).read_text(), Path(a.code).stem
+        else:
+            p.error("paper-portfolio needs --candidate or --code")
+        state = Path(a.state_dir)
+        PortfolioPaperTrader(code, load_config(a.spot_config).data.symbols, exchange=a.exchange,
+                             state_path=str(state / "state.json"), log_path=str(state / "rebalances.csv"),
+                             funding=not a.no_funding, poll_seconds=a.poll, name=name, scale=a.scale).run()
 
     elif a.cmd == "history":
         from .benchmark import format_table, load_history
