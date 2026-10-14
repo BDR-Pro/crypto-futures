@@ -58,3 +58,26 @@ def test_leak_check_passes_identical_prefixes():
     bad = full[:5].copy()
     bad[2, 1] += 1
     assert "day 2" in leak_check(full, [bad])
+
+
+def test_live_panel_is_float_when_a_coin_has_no_candles():
+    from cryptofutures import portfolio_live as pl
+    days = pd.date_range("2026-01-01", periods=60, freq="D", tz="UTC")
+
+    class FakeBinance:
+        id = "binance"
+
+        def publicGetKlines(self, params):          # Binance kline rows are strings
+            if params["symbol"] == "ETHUSDT" or params["startTime"] > days[-1].timestamp() * 1000:
+                return []
+            return [[int(t.timestamp() * 1000), "1", "2", "0.5", "1.5", "0", "0", "10", "0", "0", "5", "0"]
+                    for t in days]
+
+    trader = pl.PortfolioPaperTrader.__new__(pl.PortfolioPaperTrader)
+    trader.ex = FakeBinance()
+    trader.symbols = ["BTCUSDT", "ETHUSDT", "SOLUSDT"]
+    trader.alias = pl.anonymise(trader.symbols)
+    trader.history_days = 100
+    data, _ = trader.panel_inputs(pd.Timestamp("2026-03-15", tz="UTC"))
+    assert all(df.dtypes.eq(float).all() for df in data.values())
+    assert np.isfinite((np.sign(data["close"].pct_change(5)) * data["close"]).iloc[-1].dropna()).all()

@@ -95,7 +95,8 @@ class PortfolioPaperTrader:
             since_ms = nxt
         df = pd.DataFrame(rows, columns=["time", "open", "high", "low", "close", "quote_volume", "taker_buy_quote"])
         df["time"] = pd.to_datetime(df["time"], unit="ms", utc=True)
-        return df.drop_duplicates("time").set_index("time")
+        # float even when empty: an empty frame is object dtype and would poison the whole panel
+        return df.drop_duplicates("time").set_index("time").astype(float)
 
     def panel_inputs(self, today: pd.Timestamp) -> tuple[dict[str, pd.DataFrame], pd.DatetimeIndex]:
         since = int((today - pd.Timedelta(days=self.history_days)).timestamp() * 1000)
@@ -106,11 +107,13 @@ class PortfolioPaperTrader:
             except Exception as e:  # noqa: BLE001 - coin not listed on this venue
                 log.debug("%s unavailable: %s", s, e)
                 continue
-            frames[self.alias[s]] = df[df.index < today]          # closed days only
+            df = df[df.index < today]                               # closed days only
+            if len(df):
+                frames[self.alias[s]] = df
         idx = pd.DatetimeIndex(sorted(set().union(*(f.index for f in frames.values()))))
         cols = sorted(self.alias.values(), key=lambda c: (c != "BTC", c))
         data = {k: pd.DataFrame({c: (frames[c][src].reindex(idx) if c in frames else np.nan) for c in cols},
-                                index=idx).reset_index(drop=True) for k, src in FIELDS.items()}
+                                index=idx).astype(float).reset_index(drop=True) for k, src in FIELDS.items()}
         return data, idx
 
     def prices(self) -> dict[str, float]:
