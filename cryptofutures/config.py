@@ -16,7 +16,8 @@ TOP10 = [
 @dataclass
 class DataConfig:
     symbols: list[str] = field(default_factory=lambda: list(TOP10))
-    base_interval: str = "1h"          # simulation resolution (SL/TP/liquidation checks)
+    base_interval: str = "1h"          # simulation resolution (SL/TP/liquidation checks); "1d" for fast long tests
+    market: str = "futures"            # "futures" (USD-M perps, with funding) | "spot" (longer history, no funding)
     data_dir: str = "data"
     start: str = "2024-01-01"
     end: str = "2026-09-30"

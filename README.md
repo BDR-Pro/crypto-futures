@@ -142,6 +142,11 @@ Judge on out-of-sample numbers. A tuned config that only wins in-sample is curve
 
 `results/sample/` holds the runs made while building this repo:
 
+- **8.5 years, 43 coins including dead ones (spot 2018–2026, futures 2020–2026):** every trend rule roughly halves
+  buy-and-hold's −85% to −94% drawdowns. Donchian breakout is the most consistent (Sharpe 1.07 spot / 0.82 futures
+  vs 0.59 / 0.58). In a random 90-day window it's a coin flip; the edge comes from avoiding crashes such as 2022.
+  Take-profit variants never beat buy-and-hold (0 of 36). Overfitting probability 15% (spot) / 36% (futures).
+  See `results/sample/long-history/`.
 - **Survivorship check:** on a wider 16-coin set including coins that later dropped out of the top-10, buy-and-hold
   −10.2%, ema_trend +44.5%, trend_hybrid +51.6% (1x). ema_trend beat buy-and-hold in 75% of random 90-day windows
   and is now the champion for that setup. See `results/sample/survivorship-check/`.
@@ -189,6 +194,20 @@ cryptofutures leverage --cache-only --strategies "llm:qwen/qwen3.6-27b@v4,buy_an
 
 Replays cached decisions at forced leverage. `[risk] leverage_override` and `liq_guard` set the same thing in config.
 
+## Long history and overfitting statistics
+
+```bash
+cryptofutures download --market spot --interval 1d --data-dir data_spot --symbols ... --start 2017-08-01
+python -c "from cryptofutures.data import clean_long_history as c; c('data_spot', '1d', stitch={'MATICPOLUSDT': ['MATICUSDT','POLUSDT']})"
+cryptofutures -c results/sample/long-history/spot_43coins_2017_2026.toml quarters --yearly \
+  --strategies buy_and_hold,ema_trend,donchian_breakout --start 2018-03-01 --end 2026-10-11
+cryptofutures -c results/sample/long-history/spot_43coins_2017_2026.toml overfit --start 2018-03-01 --end 2026-10-11
+```
+
+`overfit` runs a 72-variant trend family and reports the probability of backtest overfitting (combinatorially
+symmetric cross-validation) and the deflated Sharpe ratio of the best variant. Daily candles
+(`base_interval = "1d"`) make a 9-year, 43-coin backtest take seconds.
+
 ## Randomized robustness tests and the champion
 
 A single backtest is one path. `robustness` re-runs a strategy's cached decisions many times to separate skill from luck:
@@ -214,7 +233,7 @@ model answers only: free, offline, and no accidental API spend.
 
 ```
 cryptofutures/
-  data.py        Binance Vision downloader (klines + funding), live candles via ccxt
+  data.py        Binance Vision downloader (futures/spot klines + funding), long-history cleaning, live candles
   features.py    indicators + leak-free market snapshot at decision time
   strategies/    nimble.py (Bespoke-Nimble), jev.py (Jev-Style), llm.py (generative LLM, cache), baselines.py, base.py
   risk.py        model decision -> order (leverage, SL/TP, size), with hard clamps
@@ -223,6 +242,7 @@ cryptofutures/
   benchmark.py   multi-strategy leaderboard + history
   optimize.py    walk-forward risk-parameter tuning
   robustness.py  randomized skill-vs-luck tests + champion tracking
+  overfit.py     probability of backtest overfitting (CSCV) and deflated Sharpe
   live.py        real-time paper trader (state persisted in results/live_state.json)
   cli.py         command line
 scripts/         serve_local.sh - download GGUFs once and serve them on 127.0.0.1

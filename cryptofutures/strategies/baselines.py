@@ -133,5 +133,33 @@ class TrendHybrid(Strategy):
         return _frame(times, np.where(down, SHORT, LONG), confidence=0.7, reason="long unless strong downtrend")
 
 
+class EmaTrendParam(Strategy):
+    """Parametric trend family for overfitting tests.
+
+    mode="trend":  long when fast > slow EMA, price > long EMA and ADX > adx_min; short on the mirror; else flat.
+    mode="hybrid": long by default, short only on the bearish condition; no stops.
+    """
+
+    def __init__(self, fast: int = 20, slow: int = 50, long: int = 200, adx_min: float = 20, mode: str = "trend"):
+        self.fast, self.slow, self.long, self.adx_min, self.mode = fast, slow, long, adx_min, mode
+        self.use_stops = mode == "trend"
+        self.name = f"{mode}_{fast}_{slow}_{long}_adx{int(adx_min)}"
+
+    def decide(self, symbol, store, times):
+        close = store.bars["close"]
+        ind = pd.DataFrame({"close": close, "fast": close.ewm(span=self.fast, adjust=False).mean(),
+                            "slow": close.ewm(span=self.slow, adjust=False).mean(),
+                            "long": close.ewm(span=self.long, adjust=False).mean(), "adx": store.bars["adx14"]})
+        b = ind.reindex(times - pd.Timedelta(hours=store.decision_hours)).set_axis(times)
+        strong = b["adx"] > self.adx_min
+        up = (b["fast"] > b["slow"]) & (b["close"] > b["long"]) & strong
+        dn = (b["fast"] < b["slow"]) & (b["close"] < b["long"]) & strong
+        if self.mode == "hybrid":
+            actions = np.where(dn, SHORT, LONG)
+        else:
+            actions = np.where(up, LONG, np.where(dn, SHORT, FLAT))
+        return _frame(times, actions, confidence=0.7, reason=self.name)
+
+
 BASELINES = {cls.name: cls for cls in (BuyAndHold, Flat, RandomStrategy, EmaTrend, DonchianBreakout, RsiReversion,
                                        TrendFilterLong, TrendLongShort, TrendHybrid)}

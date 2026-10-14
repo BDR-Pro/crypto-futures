@@ -1,0 +1,19 @@
+# 43 coins, USD-M futures daily candles Jan 2020 -> Oct 2026 (with funding), incl. dead/delisted coins (survivorship-resistant).
+# Prepare: cryptofutures download --market spot --interval 1d --data-dir data_spot --symbols ... ; then clean_long_history().
+[data]
+symbols = ['1000SHIBUSDT', 'AAVEUSDT', 'ADAUSDT', 'ALGOUSDT', 'ATOMUSDT', 'AVAXUSDT', 'AXSUSDT', 'BCHUSDT', 'BNBUSDT', 'BTCUSDT', 'DASHUSDT', 'DOGEUSDT', 'DOTUSDT', 'EOSUSDT', 'ETCUSDT', 'ETHUSDT', 'FILUSDT', 'FTTUSDT', 'HBARUSDT', 'ICPUSDT', 'IOTAUSDT', 'LINKUSDT', 'LTCUSDT', 'LUNAUSDT', 'MANAUSDT', 'MATICPOLUSDT', 'NEARUSDT', 'NEOUSDT', 'ONTUSDT', 'QTUMUSDT', 'SANDUSDT', 'SOLUSDT', 'THETAUSDT', 'TONUSDT', 'TRXUSDT', 'UNIUSDT', 'VETUSDT', 'WAVESUSDT', 'XLMUSDT', 'XMRUSDT', 'XRPUSDT', 'XTZUSDT', 'ZECUSDT']
+data_dir = "data_fut1d"
+base_interval = "1d"
+market = "futures"
+
+[risk]
+decision_hours = 24
+leverage_override = 1
+sl_source = "atr"
+atr_sl_mult = 1.5
+reward_risk = 100.0
+max_sl_pct = 0.25
+min_confidence = 0.0
+flat_closes = true
+max_open_positions = 43
+margin_per_trade = 0.0186      # same 80% total exposure cap as the 10-coin tests

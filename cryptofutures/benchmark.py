@@ -188,7 +188,8 @@ def quarterly_report(cfg: Config, strategies: list[str], start: str, end: str, f
         q = eq.resample(freq).last()
         prev = pd.concat([pd.Series([cfg.exchange.initial_equity], index=[eq.index[0] - pd.Timedelta(days=1)]), q])
         rets = (q / prev.shift(1).iloc[1:].values - 1)
-        rets.index = [f"{d.year}Q{(d.month - 1) // 3 + 1}" for d in rets.index]
+        rets.index = [str(d.year) if freq.startswith("Y") else f"{d.year}Q{(d.month - 1) // 3 + 1}"
+                      for d in rets.index]
         rows[strat.name] = {**{k: float(v) for k, v in rets.items()}, "TOTAL": m["total_return"],
                             "Sharpe": m["sharpe"], "max DD": m["max_drawdown"]}
     return pd.DataFrame(rows)

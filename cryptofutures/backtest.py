@@ -50,9 +50,12 @@ class Workbench:
     def __init__(self, cfg: Config, symbols: list[str] | None = None):
         self.cfg = cfg
         self.symbols = symbols or cfg.data.symbols
-        md = MarketData(cfg.data.data_dir, cfg.data.base_interval)
+        md = MarketData(cfg.data.data_dir, cfg.data.base_interval, cfg.data.market)
         self.candles = {s: md.candles(s) for s in self.symbols}
         self.funding = {s: md.funding(s) for s in self.symbols}
+        if cfg.data.base_interval == "1d":
+            # Daily candles: settle each day's funding at once, on the 00:00 candle.
+            self.funding = {s: f.resample("1D").sum() if len(f) else f for s, f in self.funding.items()}
         self.stores = {s: FeatureStore(self.candles[s], cfg.risk.decision_hours, self.funding[s]) for s in self.symbols}
 
     def decision_times(self, symbol: str, start=None, end=None) -> pd.DatetimeIndex:
