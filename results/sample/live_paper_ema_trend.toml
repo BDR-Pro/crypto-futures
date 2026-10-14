@@ -1,0 +1,16 @@
+# Run: cryptofutures -c results/sample/live_paper_ema_trend.toml paper --strategy ema_trend   (or donchian_breakout)
+# Live paper trading of the validated trend strategy (paper only: no orders are sent anywhere).
+[risk]
+decision_hours = 24
+leverage_override = 1
+sl_source = "atr"
+atr_sl_mult = 1.5
+reward_risk = 100.0
+max_sl_pct = 0.25
+min_confidence = 0.0
+flat_closes = true
+
+[live]
+exchange = "okx"
+state_path = "results/live/state.json"
+log_path = "results/live/trades.csv"

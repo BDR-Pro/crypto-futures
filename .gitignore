@@ -9,3 +9,4 @@ results/*
 *.gguf
 models/
 !results/champion.json
+data_*/

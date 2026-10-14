@@ -51,6 +51,9 @@ def main(argv: list[str] | None = None) -> None:
 
     sp = sub.add_parser("download", help="download historical futures candles + funding (Binance Vision)")
     sp.add_argument("--symbols")
+    sp.add_argument("--market", choices=["futures", "spot"], help="default from [data] market")
+    sp.add_argument("--interval", help="candle interval, e.g. 1h or 1d (default from [data] base_interval)")
+    sp.add_argument("--data-dir", help="default from [data] data_dir")
     sp.add_argument("--start")
     sp.add_argument("--end")
     sp.add_argument("--force", action="store_true")
@@ -92,6 +95,14 @@ def main(argv: list[str] | None = None) -> None:
     sp = sub.add_parser("quarters", help="per-quarter returns per strategy vs buy-and-hold (bold = beat it)")
     common(sp)
     sp.add_argument("--strategies", default="buy_and_hold,ema_trend")
+    sp.add_argument("--yearly", action="store_true", help="calendar years instead of quarters")
+
+    sp = sub.add_parser("overfit", help="72-variant trend family: PBO (CSCV) and deflated Sharpe vs buy-and-hold")
+    common(sp)
+    sp.add_argument("--blocks", type=int, default=16)
+    sp.add_argument("--splits", type=int, default=2000)
+    sp.add_argument("--trials", type=int, default=0, help="trials to deflate for (default: number of variants)")
+    sp.add_argument("--tag", default="")
 
     sp = sub.add_parser("history", help="show every benchmark run so far, best first")
     sp.add_argument("--rank-by", default="sharpe")
@@ -112,9 +123,10 @@ def main(argv: list[str] | None = None) -> None:
     if a.cmd == "download":
         from .data import MarketData
         syms = [s.upper() for s in a.symbols.split(",")] if a.symbols else cfg.data.symbols
-        MarketData(cfg.data.data_dir, cfg.data.base_interval).download(
+        MarketData(a.data_dir or cfg.data.data_dir, a.interval or cfg.data.base_interval,
+                   a.market or cfg.data.market).download(
             syms, a.start or cfg.data.start, a.end or pd.Timestamp.now(tz="UTC").strftime("%Y-%m-%d"), a.force)
-        print(f"downloaded {len(syms)} symbols into {cfg.data.data_dir}/")
+        print(f"downloaded {len(syms)} symbols into {a.data_dir or cfg.data.data_dir}/")
 
     elif a.cmd == "backtest":
         from .backtest import Workbench, make_strategy
@@ -175,7 +187,30 @@ def main(argv: list[str] | None = None) -> None:
 
     elif a.cmd == "quarters":
         from .benchmark import format_quarterly, quarterly_report
-        print(format_quarterly(quarterly_report(cfg, [x.strip() for x in a.strategies.split(",")], a.start, a.end)))
+        print(format_quarterly(quarterly_report(cfg, [x.strip() for x in a.strategies.split(",")], a.start, a.end,
+                                                freq="YE" if a.yearly else "QE")))
+
+    elif a.cmd == "overfit":
+        from datetime import datetime, timezone
+        from pathlib import Path
+
+        from .overfit import overfit_report, variant_grid
+        rets, summary = variant_grid(cfg, a.start, a.end)
+        variants = rets.drop(columns=["buy_and_hold"])
+        rep = overfit_report(variants, n_trials=a.trials or None, n_blocks=a.blocks, max_splits=a.splits)
+        bh = summary[summary.variant == "buy_and_hold"].iloc[0]
+        rep["variants_beating_buy_and_hold_sharpe"] = float((summary[summary.variant != "buy_and_hold"].sharpe
+                                                             > bh.sharpe).mean())
+        stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S")
+        out = Path("results") / f"overfit_{stamp}{'_' + a.tag if a.tag else ''}"
+        out.mkdir(parents=True, exist_ok=True)
+        rets.to_csv(out / "daily_returns.csv")
+        summary.to_csv(out / "variants.csv", index=False)
+        (out / "report.json").write_text(json.dumps(rep, indent=2, default=float))
+        print(summary.head(12).to_string(index=False))
+        print("...\n" + summary.tail(4).to_string(index=False))
+        print(json.dumps(rep, indent=2, default=float))
+        print(f"results: {out}/")
 
     elif a.cmd == "history":
         from .benchmark import format_table, load_history

@@ -13,7 +13,9 @@ import requests
 
 log = logging.getLogger(__name__)
 
-VISION = "https://data.binance.vision/data/futures/um"
+VISION_ROOT = "https://data.binance.vision/data"
+VISION = f"{VISION_ROOT}/futures/um"
+MARKETS = {"futures": f"{VISION_ROOT}/futures/um", "spot": f"{VISION_ROOT}/spot"}
 KLINE_COLS = ["open_time", "open", "high", "low", "close", "volume", "close_time",
               "quote_volume", "trades", "taker_buy_base", "taker_buy_quote", "ignore"]
 
@@ -42,17 +44,24 @@ def _get_zip_csv(url: str, session: requests.Session, retries: int = 5) -> pd.Da
     return pd.read_csv(io.BytesIO(raw), header=header)
 
 
-def _download_klines(symbol: str, interval: str, months: list[str]) -> pd.DataFrame:
+def _to_utc(ts: pd.Series) -> pd.Series:
+    """Epoch timestamps to UTC; Binance spot files switched from ms to microseconds in 2025."""
+    ts = ts.astype("int64")
+    return pd.to_datetime(ts.where(ts < 10**14, ts // 1000), unit="ms", utc=True)
+
+
+def _download_klines(symbol: str, interval: str, months: list[str], market: str = "futures") -> pd.DataFrame:
+    base = MARKETS[market]
     session = requests.Session()
     frames = []
     for month in months:
-        df = _get_zip_csv(f"{VISION}/monthly/klines/{symbol}/{interval}/{symbol}-{interval}-{month}.zip", session)
+        df = _get_zip_csv(f"{base}/monthly/klines/{symbol}/{interval}/{symbol}-{interval}-{month}.zip", session)
         if df is None:
             # Current month: monthly archive not published yet, fall back to daily files.
             days = pd.date_range(month + "-01", periods=31, freq="D")
             days = [d for d in days if d.strftime("%Y-%m") == month and d < pd.Timestamp.utcnow().tz_localize(None).normalize()]
             for d in days:
-                ddf = _get_zip_csv(f"{VISION}/daily/klines/{symbol}/{interval}/{symbol}-{interval}-{d:%Y-%m-%d}.zip", session)
+                ddf = _get_zip_csv(f"{base}/daily/klines/{symbol}/{interval}/{symbol}-{interval}-{d:%Y-%m-%d}.zip", session)
                 if ddf is not None:
                     ddf.columns = KLINE_COLS
                     frames.append(ddf)
@@ -62,7 +71,7 @@ def _download_klines(symbol: str, interval: str, months: list[str]) -> pd.DataFr
     if not frames:
         raise RuntimeError(f"no kline data for {symbol} {interval}")
     df = pd.concat(frames, ignore_index=True)
-    df["open_time"] = pd.to_datetime(df["open_time"], unit="ms", utc=True)
+    df["open_time"] = _to_utc(df["open_time"])
     df = df.set_index("open_time")[["open", "high", "low", "close", "volume", "quote_volume", "taker_buy_quote"]]
     df = df.astype(float)
     return df[~df.index.duplicated()].sort_index()
@@ -79,7 +88,7 @@ def _download_funding(symbol: str, months: list[str]) -> pd.DataFrame:
     if not frames:
         return pd.DataFrame(columns=["rate"], index=pd.DatetimeIndex([], tz="UTC"))
     df = pd.concat(frames, ignore_index=True)
-    ts = pd.to_datetime(df["calc_time"], unit="ms", utc=True).dt.floor("h")
+    ts = _to_utc(df["calc_time"]).dt.floor("h")
     out = pd.DataFrame({"rate": df["last_funding_rate"].astype(float).values}, index=ts)
     return out[~out.index.duplicated()].sort_index()
 
@@ -87,9 +96,10 @@ def _download_funding(symbol: str, months: list[str]) -> pd.DataFrame:
 class MarketData:
     """Loads and caches per-symbol hourly candles and funding rates."""
 
-    def __init__(self, data_dir: str | Path, interval: str = "1h"):
+    def __init__(self, data_dir: str | Path, interval: str = "1h", market: str = "futures"):
         self.dir = Path(data_dir)
         self.interval = interval
+        self.market = market
         self.dir.mkdir(parents=True, exist_ok=True)
 
     def _path(self, symbol: str, kind: str) -> Path:
@@ -100,13 +110,19 @@ class MarketData:
 
         def one(sym: str) -> str:
             kpath, fpath = self._path(sym, self.interval), self._path(sym, "funding")
-            if force or not kpath.exists():
-                self._write(_download_klines(sym, self.interval, months), kpath)
-            if force or not fpath.exists():
-                self._write(_download_funding(sym, months), fpath)
+            try:
+                if force or not kpath.exists():
+                    self._write(_download_klines(sym, self.interval, months, self.market), kpath)
+                if force or not fpath.exists():
+                    funding = _download_funding(sym, months) if self.market == "futures" else \
+                        pd.DataFrame(columns=["rate"], index=pd.DatetimeIndex([], tz="UTC"))
+                    self._write(funding, fpath)
+            except RuntimeError as exc:          # not listed in this market / period
+                log.warning("skipped %s: %s", sym, exc)
+                return f"{sym} (skipped)"
             return sym
 
-        with ThreadPoolExecutor(max_workers=5) as pool:
+        with ThreadPoolExecutor(max_workers=8) as pool:
             for sym in pool.map(one, symbols):
                 log.info("downloaded %s", sym)
 
@@ -162,3 +178,41 @@ def fetch_live_candles(exchange, symbol: str, timeframe: str = "1h", limit: int 
 def to_ccxt_symbol(symbol: str) -> str:
     base = symbol.removesuffix("USDT")
     return f"{base}/USDT:USDT"
+
+
+def clean_long_history(data_dir: str | Path, interval: str = "1d", max_gap_days: int = 14,
+                       stitch: dict[str, list[str]] | None = None) -> list[str]:
+    """Prepare a multi-year dataset for backtests that must include dead coins.
+
+    * Cuts each series at its first gap longer than max_gap_days: a delisting, or a ticker later
+      reused for a different asset (Binance's LUNAUSDT after the 2022 collapse). The engine keeps
+      the last price for the rest of the test, as a delisting would.
+    * Stitches renamed tickers into one series, e.g. {"MATICPOLUSDT": ["MATICUSDT", "POLUSDT"]}.
+    Returns the cleaned symbols.
+    """
+    md = MarketData(data_dir, interval)
+    stitch = stitch or {}
+    stitched_parts = {p for parts in stitch.values() for p in parts}
+    for name, parts in stitch.items():
+        frames = [md.candles(p) for p in parts if md._path(p, interval).exists()]
+        funds = [md.funding(p) for p in parts if md._path(p, "funding").exists()]
+        if frames:
+            k = pd.concat(frames)
+            md._write(k[~k.index.duplicated(keep="last")].sort_index(), md._path(name, interval))
+            f = pd.concat([x for x in funds if len(x)]) if any(len(x) for x in funds) else pd.Series(dtype=float)
+            out = f[~f.index.duplicated(keep="last")].sort_index().to_frame("rate") if len(f) else \
+                pd.DataFrame(columns=["rate"], index=pd.DatetimeIndex([], tz="UTC"))
+            md._write(out, md._path(name, "funding"))
+    cleaned = []
+    for path in sorted(Path(data_dir).glob(f"*_{interval}.csv.gz")):
+        sym = path.name.removesuffix(f"_{interval}.csv.gz")
+        if sym in stitched_parts:
+            continue
+        df = md.candles(sym)
+        gaps = df.index.to_series().diff() > pd.Timedelta(days=max_gap_days)
+        if gaps.any():
+            cut = gaps.idxmax()
+            log.info("%s: cut at %s (gap of %s)", sym, cut.date(), df.index.to_series().diff()[cut])
+            md._write(df[df.index < cut], path)
+        cleaned.append(sym)
+    return cleaned

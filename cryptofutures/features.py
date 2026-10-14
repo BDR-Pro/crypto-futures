@@ -50,8 +50,9 @@ def resample(df: pd.DataFrame, hours: int) -> pd.DataFrame:
            "quote_volume": "sum", "taker_buy_quote": "sum"}
     out = df.resample(rule, label="left", closed="left", origin="epoch").agg(agg).dropna(subset=["close"])
     # Drop a trailing bar that is not yet complete.
+    base = df.index.to_series().diff().median() if len(df) > 1 else pd.Timedelta(hours=1)
     expected_end = out.index[-1] + pd.Timedelta(hours=hours)
-    if df.index[-1] + pd.Timedelta(hours=1) < expected_end:
+    if df.index[-1] + base < expected_end:
         out = out.iloc[:-1]
     return out
 

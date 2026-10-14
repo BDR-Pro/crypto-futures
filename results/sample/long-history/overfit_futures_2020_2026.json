@@ -1,0 +1,15 @@
+{
+  "best_variant": "trend_10_30_100_adx0|ride15",
+  "best_sharpe_annual": 0.8954809662122934,
+  "luck_threshold_sharpe_annual": 0.660232010471418,
+  "trials": 72,
+  "deflated_sharpe_prob": 0.7174762083091604,
+  "share_variants_positive": 0.9305555555555556,
+  "pbo": 0.364,
+  "splits": 2000,
+  "variants": 72,
+  "median_oos_sharpe_of_is_best_daily": 0.02350065875078789,
+  "share_is_best_positive_oos": 0.8245,
+  "median_sharpe_degradation_daily": 0.027151727042174226,
+  "variants_beating_buy_and_hold_sharpe": 0.4166666666666667
+}

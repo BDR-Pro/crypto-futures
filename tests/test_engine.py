@@ -343,3 +343,44 @@ def test_trend_hybrid_is_long_unless_strong_downtrend():
         d = TrendHybrid().decide("X", store, store.decision_times()[-30:])
         assert (d.action == expect).all()
     assert TrendHybrid.use_stops is False
+
+
+def test_pbo_flags_pure_noise_and_spares_real_edge():
+    from cryptofutures.overfit import deflated_sharpe, expected_max_sharpe, pbo_cscv, sharpe
+    rng = np.random.default_rng(0)
+    noise = pd.DataFrame(rng.normal(0, 0.01, (2000, 40)))
+    p_noise = pbo_cscv(noise, n_blocks=10, max_splits=200)["pbo"]
+    edge = noise.copy()
+    edge[0] = edge[0] + 0.004                              # one variant with a real, persistent edge
+    p_edge = pbo_cscv(edge, n_blocks=10, max_splits=200)["pbo"]
+    assert p_noise > 0.3 and p_edge < 0.05
+    srs = np.array([sharpe(noise[c].to_numpy()) for c in noise])
+    sr0 = expected_max_sharpe(srs)
+    assert deflated_sharpe(edge[0].to_numpy(), sr0) > 0.99
+    assert deflated_sharpe(noise[int(srs.argmax())].to_numpy(), sr0) < 0.9
+
+
+def test_mixed_ms_and_microsecond_timestamps():
+    from cryptofutures.data import _to_utc
+    ms = 1735603200000                    # 2024-12-31 00:00 UTC in ms (pre-2025 spot files)
+    us = 1735689600000000                 # 2025-01-01 00:00 UTC in microseconds (2025+ spot files)
+    out = _to_utc(pd.Series([ms, us]))
+    assert str(out.iloc[0].date()) == "2024-12-31" and str(out.iloc[1].date()) == "2025-01-01"
+
+
+def test_clean_long_history_cuts_reused_ticker_and_stitches(tmp_path):
+    from cryptofutures.data import MarketData, clean_long_history
+    md = MarketData(tmp_path, "1d")
+    old = candles([10.0, 5.0, 0.01], start="2022-05-10")
+    old.index = pd.date_range("2022-05-10", periods=3, freq="D", tz="UTC")
+    new = old.copy() * 500
+    new.index = pd.date_range("2022-09-01", periods=3, freq="D", tz="UTC")   # same ticker, new asset
+    md._write(pd.concat([old, new]), md._path("LUNAUSDT", "1d"))
+    a = old.copy(); b = new.copy()
+    md._write(a, md._path("OLDUSDT", "1d")); md._write(b, md._path("NEWUSDT", "1d"))
+    for s in ("LUNAUSDT", "OLDUSDT", "NEWUSDT"):
+        md._write(pd.DataFrame(columns=["rate"], index=pd.DatetimeIndex([], tz="UTC")), md._path(s, "funding"))
+    syms = clean_long_history(tmp_path, "1d", stitch={"JOINEDUSDT": ["OLDUSDT", "NEWUSDT"]})
+    assert "LUNAUSDT" in syms and "OLDUSDT" not in syms and "JOINEDUSDT" in syms
+    luna = md.candles("LUNAUSDT")
+    assert luna.index[-1] < pd.Timestamp("2022-06-01", tz="UTC") and luna.close.iloc[-1] == pytest.approx(0.01)
